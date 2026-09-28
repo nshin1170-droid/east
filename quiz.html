@@ -1,0 +1,1670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- PAGE SETUP AND RESPONSIVE DISPLAY CONFIGURATION -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Quiz App — East Systems Colleges of Rizal</title>
+
+    <style>
+        /* GLOBAL STYLES */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            /* Place system.png in the same folder as this HTML file. */
+            background:   url('system.png') center / cover fixed no-repeat;
+            min-height: 100vh;
+            padding: 12px;
+        }
+
+        /* TOP PROFILE BAR */
+        .top-bar {
+            background: white;
+            border-radius: 20px;
+            padding: 16px 20px;
+            box-shadow: 0 4px 12px rgba(155,44,44,0.08);
+            margin-bottom: 16px;
+        }
+
+        .school-name {
+            text-align: center;
+            color: #9b2c2c;
+            font-weight: 700;
+            font-size: clamp(15px, 4.5vw, 18px);
+            margin-bottom: 10px;
+        }
+
+        .profile-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .profile-info { display: flex; align-items: center; gap: 10px; }
+
+        .avatar {
+            width: 42px; height: 42px; border-radius: 50%;
+            background: linear-gradient(135deg, #c53030, #9b2c2c);
+            color: white; display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 18px;
+        }
+
+        .user-meta { line-height: 1.3; }
+        .user-name { font-weight: 600; color: #2d3748; font-size: 15px; }
+        .user-stats { font-size: 13px; color: #718096; }
+
+        .stat-badges { display: flex; gap: 10px; }
+        .stat-badge {
+            background: #fff5f5; color: #9b2c2c;
+            padding: 6px 12px; border-radius: 20px;
+            font-size: 13px; font-weight: 600;
+        }
+
+        .logout-btn {
+            background: #c53030; color: white; border: none;
+            padding: 8px 14px; border-radius: 10px;
+            font-weight: 600; cursor: pointer; font-size: 14px;
+        }
+
+        /* NAVIGATION TABS */
+        .nav {
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px;
+            margin-bottom: 16px;
+        }
+
+        .nav-btn {
+            padding: 10px 4px; background: white; border: none;
+            border-radius: 12px; font-size: 12px; font-weight: 600;
+            color: #718096; cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            text-align: center;
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, #c53030, #9b2c2c);
+            color: white; box-shadow: 0 4px 10px rgba(155,44,44,0.25);
+        }
+
+        /* MAIN CONTENT CARDS */
+        .card {
+            background: white; border-radius: 20px;
+            padding: 20px; margin-bottom: 14px;
+            box-shadow: 0 4px 12px rgba(155,44,44,0.06);
+        }
+
+        .card-title {
+            font-size: 17px; font-weight: 700; color: #9b2c2c;
+            margin-bottom: 16px; padding-bottom: 8px;
+            border-bottom: 2px solid #fed7d7;
+        }
+
+        /* FORM CONTROLS */
+        label { display: block; margin-bottom: 6px; font-weight: 600; color: #4a5568; font-size: 14px; }
+        select, .btn {
+            width: 100%; padding: 13px; border-radius: 12px;
+            font-size: 15px; margin-bottom: 12px;
+        }
+
+        select {
+            border: 2px solid #fed7d7; background: white;
+            color: #2d3748;
+        }
+        select:focus { outline: none; border-color: #c53030; }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #c53030, #9b2c2c);
+            color: white; border: none; font-weight: 700;
+            font-size: 16px; margin-top: 6px; cursor: pointer;
+        }
+        .btn-primary:active { transform: scale(0.97); }
+
+        /* QUIZ INTERFACE */
+        .quiz-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 14px; flex-wrap: wrap; gap: 8px;
+        }
+
+        .lives { font-size: 20px; letter-spacing: 2px; }
+        .timer { font-size: 20px; font-weight: bold; color: #c53030; }
+        .streak {
+            background: #fed7d7; color: #9b2c2c;
+            padding: 4px 12px; border-radius: 20px;
+            font-weight: bold; font-size: 14px;
+        }
+
+        .progress-bar {
+            height: 10px; background: #fed7d7; border-radius: 5px;
+            margin-bottom: 16px; overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%; background: linear-gradient(90deg, #c53030, #9b2c2c);
+            width: 0%; transition: width 0.3s;
+        }
+
+        .q-badge {
+            display: inline-block; padding: 4px 10px; border-radius: 12px;
+            font-size: 12px; font-weight: bold; margin-bottom: 8px;
+        }
+        .q-badge-mc { background: #ebf8ff; color: #2b6cb0; }
+        .q-badge-tf { background: #fefcbf; color: #975a16; }
+        .q-badge-id { background: #feebc8; color: #c05621; }
+
+        .q-text {
+            font-size: 18px; font-weight: 600; color: #2d3748;
+            margin-bottom: 18px; line-height: 1.5;
+        }
+
+        /* ANSWER OPTIONS (MULTIPLE CHOICE & TRUE/FALSE) */
+        .option {
+            padding: 14px 16px; border: 2px solid #fed7d7;
+            border-radius: 12px; margin-bottom: 10px;
+            cursor: pointer; font-size: 15px; font-weight: 500;
+            transition: all 0.2s;
+        }
+        .option:hover { border-color: #c53030; background: #fff5f5; }
+        .option.correct { border-color: #2f855a; background: #f0fff4; color: #22543d; font-weight: 700; }
+        .option.wrong { border-color: #c53030; background: #fff5f5; color: #9b2c2c; font-weight: 700; }
+
+        /* IDENTIFICATION INPUT INTERFACE (NO CHOICES GIVEN) */
+        .ident-box {
+            background: #fffafa; border: 2px dashed #fed7d7;
+            border-radius: 14px; padding: 18px 14px; margin-bottom: 14px;
+        }
+        .ident-input {
+            width: 100%; padding: 14px; border: 2px solid #cbd5e0;
+            border-radius: 12px; font-size: 16px; margin-bottom: 10px;
+            transition: border-color 0.2s;
+        }
+        .ident-input:focus { outline: none; border-color: #c53030; }
+        .ident-input.correct { border-color: #2f855a; background: #f0fff4; color: #22543d; font-weight: 700; }
+        .ident-input.wrong { border-color: #c53030; background: #fff5f5; color: #9b2c2c; font-weight: 700; }
+
+        /* EXPLANATION BOX */
+        .explanation {
+            margin-top: 14px; padding: 12px 14px;
+            background: #fff5f5; border-radius: 10px;
+            border-left: 4px solid #c53030;
+            color: #9b2c2c; font-size: 14px; line-height: 1.5;
+        }
+
+        /* POWER-UPS */
+        .powerups { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+        .p-btn {
+            padding: 8px 12px; background: #fff5f5; border: 1px solid #fed7d7;
+            border-radius: 10px; font-size: 13px; font-weight: 600;
+            color: #9b2c2c; cursor: pointer;
+        }
+        .p-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* DAILY CHALLENGE */
+        .daily-card {
+            background: linear-gradient(135deg, #c53030, #9b2c2c);
+            color: white; padding: 20px; border-radius: 16px;
+            text-align: center;
+        }
+        .daily-card h3 { margin-bottom: 8px; font-size: 18px; }
+        .daily-card p { margin-bottom: 14px; opacity: 0.9; font-size: 14px; }
+        .daily-btn {
+            background: white; color: #9b2c2c; border: none;
+            padding: 12px 24px; border-radius: 12px;
+            font-weight: 700; font-size: 15px; cursor: pointer;
+        }
+
+        /* BADGES */
+        .badges-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 12px;
+        }
+        .badge {
+            text-align: center; padding: 16px 12px;
+            background: #ffffff; border: 2px solid #fed7d7;
+            border-radius: 14px; transition: transform 0.2s;
+            position: relative;
+        }
+        .badge.unlocked {
+            border-color: #2f855a;
+            background: #f0fff4;
+            box-shadow: 0 4px 10px rgba(47,133,90,0.15);
+        }
+        .badge.locked {
+            opacity: 0.55;
+            background: #f7fafc;
+            border-color: #e2e8f0;
+            filter: grayscale(80%);
+        }
+        .badge-icon { font-size: 32px; margin-bottom: 6px; }
+        .badge-name { font-size: 13px; font-weight: 700; color: #2d3748; margin-bottom: 4px; }
+        .badge-desc { font-size: 11px; color: #718096; line-height: 1.3; }
+        .badge-status {
+            font-size: 10px; font-weight: 700; margin-top: 6px;
+            display: inline-block; padding: 2px 8px; border-radius: 10px;
+        }
+        .status-unlocked { background: #c6f6d5; color: #22543d; }
+        .status-locked { background: #edf2f7; color: #718096; }
+
+        /* TOAST NOTIFICATION FOR BADGES */
+        #badgeToast {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background: linear-gradient(135deg, #2f855a, #276749);
+            color: white; padding: 14px 22px; border-radius: 30px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+            font-weight: 700; font-size: 14px; z-index: 10000;
+            display: none; text-align: center;
+        }
+
+        /* TABLES */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+        th, td { padding: 10px 8px; text-align: left; border-bottom: 1px solid #fed7d7; }
+        th { background: #fff5f5; color: #9b2c2c; font-weight: 700; }
+        .r1 { background: #fef3c7; font-weight: bold; }
+        .r2 { background: #e2e8f0; font-weight: bold; }
+        .r3 { background: #fed7d7; font-weight: bold; }
+
+        /* STATISTICS */
+        .stats-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; margin-bottom: 16px; }
+        .stat-box { background: #fff5f5; padding: 16px; border-radius: 12px; text-align: center; }
+        .stat-num { font-size: 24px; font-weight: bold; color: #9b2c2c; }
+        .stat-lbl { font-size: 13px; color: #718096; margin-top: 4px; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<!-- BADGE POPUP NOTIFICATION -->
+<div id="badgeToast"></div>
+
+<!-- === TOP PROFILE BAR === -->
+<div class="top-bar">
+    <div class="school-name">ðŸ« East Systems Colleges of Rizal</div>
+    <div class="profile-row">
+        <div class="profile-info">
+            <div class="avatar" id="avatar">S</div>
+            <div class="user-meta">
+                <div class="user-name" id="userName">Student</div>
+                <div class="user-stats">Level <span id="uLevel">1</span> â€¢ <span id="uPoints">0</span> pts</div>
+            </div>
+        </div>
+        <div class="stat-badges">
+            <span class="stat-badge">â¤ï¸ <span id="uLives">5</span></span>
+            <span class="stat-badge">ðŸ”¥ <span id="uStreak">0</span></span>
+        </div>
+        <button class="logout-btn" onclick="logout()">🚪 Exit</button>
+    </div>
+</div>
+
+<!-- === NAVIGATION BUTTONS === -->
+<div class="nav">
+    <button class="nav-btn active" onclick="switchTab('quiz')">ðŸ“ Quiz</button>
+    <button class="nav-btn" onclick="switchTab('daily')">📅 Daily</button>
+    <button class="nav-btn" onclick="switchTab('badges')">ðŸ… Badges</button>
+    <button class="nav-btn" onclick="switchTab('leader')">ðŸ† Rank</button>
+    <button class="nav-btn" onclick="switchTab('stats')">📊 Stats</button>
+</div>
+
+<!-- ========== QUIZ TAB ========== -->
+<div id="tab-quiz">
+    <!-- SETUP CARD -->
+    <div class="card" id="setupCard">
+        <div class="card-title">Start a Quiz Challenge</div>
+        
+        <label>ðŸŽ“ Grade Level</label>
+        <select id="selGrade">
+            <option value="all">All Grades (Grade 11 & 12)</option>
+            <option value="11">Grade 11</option>
+            <option value="12">Grade 12</option>
+        </select>
+
+        <label>ðŸ“‚ Subject</label>
+        <select id="selSubject">
+            <option value="all">All Subjects (Mixed)</option>
+            <option value="Science">ðŸ”¬ Science</option>
+            <option value="Mathematics">ðŸ“ Mathematics</option>
+            <option value="Filipino">ðŸ‡µðŸ‡­ Filipino</option>
+            <option value="English">🔤 English</option>
+            <option value="Social Science">ðŸ“œ Social Science</option>
+        </select>
+
+        <label>ðŸ“ Question Type</label>
+        <select id="selType">
+            <option value="all">🎲 All Types (Mixed: Multiple Choice, T/F, Identification)</option>
+            <option value="multiple_choice">🔤 Multiple Choice (A, B, C, D)</option>
+            <option value="true_false">âš–ï¸ True or False</option>
+            <option value="identification">âœï¸ Identification (Type Answer, No Choices)</option>
+        </select>
+
+        <label>📊 Difficulty</label>
+        <select id="selDiff">
+            <option value="all">All Difficulty Levels</option>
+            <option value="Easy">ðŸŸ¢ Easy</option>
+            <option value="Average">ðŸŸ¡ Average</option>
+            <option value="Difficult">ðŸ”´ Difficult</option>
+            <option value="Mastery">ðŸ’Ž Mastery</option>
+        </select>
+
+        <button class="btn btn-primary" onclick="beginQuiz()">â–¶ï¸ Start Quiz</button>
+    </div>
+
+    <!-- ACTIVE QUIZ CARD -->
+    <div class="card hidden" id="quizCard">
+        <div class="quiz-header">
+            <div class="lives" id="livesDisp">â¤ï¸â¤ï¸â¤ï¸â¤ï¸â¤ï¸</div>
+            <div class="streak">Streak: <span id="qStreak">0</span></div>
+            <div class="timer" id="qTimer">â±ï¸ 30s</div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="qProgress"></div></div>
+
+        <!-- POWER-UPS -->
+        <div class="powerups">
+            <button class="p-btn" id="p50" onclick="usePU('p50')">50/50 Ã—<span id="c50">3</span></button>
+            <button class="p-btn" id="pSkip" onclick="usePU('skip')">Skip Ã—<span id="cSkip">2</span></button>
+            <button class="p-btn" id="pHint" onclick="usePU('hint')">Hint Ã—<span id="cHint">2</span></button>
+            <button class="p-btn" id="pSec" onclick="usePU('sec')">2nd Chance Ã—<span id="cSec">1</span></button>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <span style="font-size:13px; color:#718096;">Question <span id="qNum">1</span> of <span id="qTotal">5</span></span>
+            <span id="qTypeBadge" class="q-badge q-badge-mc">Multiple Choice</span>
+        </div>
+
+        <div class="q-text" id="qText">Question will appear here...</div>
+
+        <!-- OPTIONS BOX (Populated dynamically: Choices for MC/TF, Text Input for Identification) -->
+        <div id="optsBox"></div>
+
+        <!-- EXPLANATION -->
+        <div id="expBox"></div>
+
+        <button class="btn btn-primary hidden" id="nextBtn" onclick="goNext()">âž¡ï¸ Next Question</button>
+    </div>
+
+    <!-- RESULTS CARD -->
+    <div class="card hidden" id="resultCard">
+        <div class="card-title" style="text-align:center; font-size:22px;">🎉 Quiz Complete!</div>
+        <div style="text-align:center; padding:10px;">
+            <div style="font-size:42px; font-weight:bold; color:#c53030;" id="scoreBig">0/5</div>
+            <div style="font-size:18px; color:#718096; margin:8px 0;" id="scorePct">0%</div>
+            <div style="font-size:16px; color:#9b2c2c; font-weight:600;" id="scorePts">+0 Points</div>
+        </div>
+        <button class="btn btn-primary" onclick="resetQuiz()">🔄 New Quiz</button>
+    </div>
+</div>
+
+<!-- ========== DAILY CHALLENGE TAB ========== -->
+<div id="tab-daily" class="hidden">
+    <div class="daily-card">
+        <h3>📅 Daily Challenge</h3>
+        <p>Answer 5 special questions today and earn a whopping <strong>+50 Bonus Points</strong>!</p>
+        <button class="daily-btn" id="dailyBtn" onclick="doDailyChallenge()">🚀 Start Challenge</button>
+        <p id="dailyMsg" style="margin-top:12px; display:none;">✅ Completed for today! Check back tomorrow for another challenge!</p>
+    </div>
+</div>
+
+<!-- ========== BADGES TAB ========== -->
+<div id="tab-badges" class="hidden">
+    <div class="card">
+        <div class="card-title">ðŸ… Student Achievements & Badges</div>
+        <p style="font-size:13px; color:#718096; margin-bottom:14px;">Unlock achievements by taking quizzes, answering correctly, maintaining streaks, and mastering subjects!</p>
+        <div class="badges-grid" id="badgesGrid"></div>
+    </div>
+</div>
+
+<!-- ========== LEADERBOARD TAB ========== -->
+<div id="tab-leader" class="hidden">
+    <div class="card">
+        <div class="card-title">ðŸ† All Student Rankings</div>
+        <p style="font-size:13px; color:#718096; margin-bottom:12px;">Lahat ng registered students — ranked by Total Points. Hindi mawawala ang mga accounts!</p>
+        <div id="lbLoading" style="text-align:center; padding:20px; color:#9b2c2c; font-weight:600;">â³ Loading rankings...</div>
+        <div style="overflow-x:auto;">
+        <table id="lbTable" style="display:none;">
+            <thead>
+                <tr>
+                    <th>🥇 Rank</th>
+                    <th>👤 Student Name</th>
+                    <th>â­ Points</th>
+                    <th>📊 Level</th>
+                    <th>🎯 Accuracy</th>
+                    <th>ðŸ“ Quizzes</th>
+                    <th>ðŸ… Badges</th>
+                </tr>
+            </thead>
+            <tbody id="lbBody"></tbody>
+        </table>
+        </div>
+        <div id="lbEmpty" style="display:none; text-align:center; padding:20px; color:#718096;">
+            No students found. Be the first to register!
+        </div>
+    </div>
+</div>
+
+<!-- ========== STATISTICS TAB ========== -->
+<div id="tab-stats" class="hidden">
+    <div class="card">
+        <div class="card-title">📊 Your Personal Performance Stats</div>
+        <div class="stats-grid">
+            <div class="stat-box"><div class="stat-num" id="sTotal">0</div><div class="stat-lbl">Questions Answered</div></div>
+            <div class="stat-box"><div class="stat-num" id="sAcc">0%</div><div class="stat-lbl">Overall Accuracy</div></div>
+            <div class="stat-box"><div class="stat-num" id="sStreak">0</div><div class="stat-lbl">Highest Streak</div></div>
+            <div class="stat-box"><div class="stat-num" id="sPts">0</div><div class="stat-lbl">Total Points</div></div>
+        </div>
+
+        <div style="background:#fffafa; padding:14px; border-radius:12px; border:1px solid #fed7d7; margin-bottom:16px;">
+            <div style="margin-bottom:8px;">
+                <b style="color:#2f855a;">✅ Strongest Subject:</b> <span id="strongList" style="color:#2d3748; font-weight:600;">—</span>
+            </div>
+            <div>
+                <b style="color:#c53030;">⚠️ï¸ Needs Practice:</b> <span id="weakList" style="color:#2d3748; font-weight:600;">—</span>
+            </div>
+        </div>
+
+        <h4 style="color:#9b2c2c; margin-bottom:8px; font-size:14px;">📚 Performance by Subject</h4>
+        <div id="subjStatsTable"></div>
+
+        <h4 style="color:#9b2c2c; margin-top:16px; margin-bottom:8px; font-size:14px;">ðŸ“ Performance by Question Type</h4>
+        <div id="typeStatsTable"></div>
+    </div>
+</div>
+
+<!-- INCLUDE UNIVERSAL API CLIENT -->
+<script>
+/**
+ * East Systems Colleges of Rizal - Quiz App
+ * Universal Frontend API Client & Storage Sync
+ */
+
+const API = {
+    // Detect whether API is reachable.
+    // WebIntoApp wraps the app as a native WebView pointing to a real hosted URL,
+    // so http/https always works there. file:// = opened directly in browser (no server).
+    baseUrl: (function() {
+        const proto = window.location.protocol;
+        if (proto === 'http:' || proto === 'https:') {
+            // Hosted on a real server (local PHP server, or WebIntoApp/cloud hosting)
+            return 'api.php';
+        }
+        // Opened directly as a file — point to local server if running
+        return 'http://localhost:8000/api.php';
+    })(),
+
+    isOnline: false,
+
+    async init() {
+        try {
+            const res = await fetch(`${this.baseUrl}?action=ping`, { cache: 'no-store' });
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success) {
+                    this.isOnline = true;
+                }
+            }
+        } catch (e) {
+            this.isOnline = false;
+        }
+        this.renderStatusBadge();
+        return this.isOnline;
+    },
+
+    renderStatusBadge() {
+        let badge = document.getElementById('apiStatusBadge');
+        if (!badge) {
+            badge = document.createElement('div');
+            badge.id = 'apiStatusBadge';
+            badge.style.position = 'fixed';
+            badge.style.bottom = '12px';
+            badge.style.right = '12px';
+            badge.style.padding = '6px 12px';
+            badge.style.borderRadius = '20px';
+            badge.style.fontSize = '12px';
+            badge.style.fontWeight = '600';
+            badge.style.zIndex = '9999';
+            badge.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+            badge.style.transition = 'all 0.3s';
+            document.body.appendChild(badge);
+        }
+
+        if (this.isOnline) {
+            badge.style.backgroundColor = '#2f855a';
+            badge.style.color = '#ffffff';
+            badge.innerHTML = 'ðŸŸ¢ Database Server Online';
+            badge.title = 'Connected to central SQLite/PHP backend database.';
+        } else {
+            badge.style.backgroundColor = '#dd6b20';
+            badge.style.color = '#ffffff';
+            badge.innerHTML = 'ðŸŸ¡ Offline (Local Mode)';
+            badge.title = 'Running on browser storage. Start START_APP.bat for full multi-device database.';
+        }
+    },
+
+    // ==================== AUTHENTICATION ==================== //
+    async login(username, password, role) {
+        try {
+            const res = await fetch(`${this.baseUrl}?action=login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password, role })
+            });
+            const data = await res.json();
+            if (data && typeof data === 'object') {
+                if (data.success) {
+                    this.isOnline = true;
+                    this.renderStatusBadge();
+                }
+                return data;
+            }
+        } catch (err) {
+            console.warn('API error, falling back to local auth', err);
+        }
+
+        // LocalStorage fallback
+        const allUsers = JSON.parse(localStorage.getItem('allAccounts') || '[]');
+        if (!allUsers.find(a => a.username === 'admin')) {
+            allUsers.unshift({ username: 'admin', password: 'admin123', role: 'admin', name: 'Administrator' });
+        }
+        const found = allUsers.find(u => u.username === username && u.password === password);
+        if (found && found.role === role) {
+            return { success: true, user: found };
+        }
+        return { success: false, error: 'Incorrect username or password!' };
+    },
+
+    async signup(name, username, password, role) {
+        if (this.isOnline) {
+            try {
+                const res = await fetch(`${this.baseUrl}?action=signup`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, username, password, role })
+                });
+                return await res.json();
+            } catch (err) {
+                console.warn('API error, falling back to local signup', err);
+            }
+        }
+
+        // LocalStorage fallback
+        let allUsers = JSON.parse(localStorage.getItem('allAccounts') || '[]');
+        if (allUsers.find(u => u.username === username)) {
+            return { success: false, error: 'Username already taken!' };
+        }
+        allUsers.push({ name, username, password, role, id: Date.now() });
+        localStorage.setItem('allAccounts', JSON.stringify(allUsers));
+        return { success: true, message: 'Account created successfully!' };
+    },
+
+    // ==================== QUESTIONS ==================== //
+    async getQuestions(grade = 'all', category = 'all', difficulty = 'all', type = 'all') {
+        if (this.isOnline) {
+            try {
+                const url = new URL(this.baseUrl, window.location.href);
+                url.searchParams.set('action', 'get_questions');
+                if (grade !== 'all') url.searchParams.set('grade', grade);
+                if (category !== 'all') url.searchParams.set('category', category);
+                if (difficulty !== 'all') url.searchParams.set('difficulty', difficulty);
+                if (type !== 'all') url.searchParams.set('type', type);
+
+                const res = await fetch(url.toString());
+                const data = await res.json();
+                if (data.success && data.questions) {
+                    return data.questions;
+                }
+            } catch (err) {
+                console.warn('API error getting questions', err);
+            }
+        }
+
+        // LocalStorage fallback
+        let qs = JSON.parse(localStorage.getItem('shsQuestions') || '[]');
+        if (!qs.length) {
+            qs = [
+                {id: 1, grade:"11",category:"Science",difficulty:"Easy",type:"multiple_choice",question:"What is the primary chemical formula for Water?",choices:["H2O","CO2","O2","NaCl"],correct:0,correct_text:"",explanation:"H2O = 2 Hydrogen + 1 Oxygen."},
+                {id: 2, grade:"11",category:"Science",difficulty:"Easy",type:"true_false",question:"Photosynthesis takes place primarily in the chloroplasts of plant cells.",choices:["True","False"],correct:0,correct_text:"",explanation:"Chloroplasts contain chlorophyll."},
+                {id: 3, grade:"11",category:"Science",difficulty:"Easy",type:"identification",question:"What is the chemical symbol for Gold?",choices:[],correct:0,correct_text:"Au",explanation:"Au is from Latin Aurum."},
+                {id: 4, grade:"11",category:"Mathematics",difficulty:"Easy",type:"multiple_choice",question:"What is the product of 7 multiplied by 8?",choices:["54","56","49","63"],correct:1,correct_text:"",explanation:"7 Ã— 8 = 56."},
+                {id: 5, grade:"11",category:"Mathematics",difficulty:"Easy",type:"identification",question:"What is the value of Pi rounded to two decimal places?",choices:[],correct:0,correct_text:"3.14",explanation:"Pi is approximately 3.14."}
+            ];
+            localStorage.setItem('shsQuestions', JSON.stringify(qs));
+        }
+
+        return qs.filter(q => {
+            const okG = grade === 'all' || !q.grade || q.grade === grade;
+            const okS = category === 'all' || q.category === category;
+            const okD = difficulty === 'all' || q.difficulty === difficulty;
+            const okT = type === 'all' || !q.type || q.type === type;
+            return okG && okS && okD && okT;
+        });
+    },
+
+    async addQuestion(qData) {
+        if (this.isOnline) {
+            try {
+                const res = await fetch(`${this.baseUrl}?action=add_question`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(qData)
+                });
+                return await res.json();
+            } catch (err) {
+                console.warn('API error adding question', err);
+            }
+        }
+
+        // LocalStorage fallback
+        const qs = JSON.parse(localStorage.getItem('shsQuestions') || '[]');
+        qData.id = Date.now();
+        qs.unshift(qData);
+        localStorage.setItem('shsQuestions', JSON.stringify(qs));
+        return { success: true, message: 'Question saved locally!' };
+    },
+
+    async editQuestion(qData) {
+        if (this.isOnline) {
+            try {
+                const res = await fetch(`${this.baseUrl}?action=edit_question`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(qData)
+                });
+                return await res.json();
+            } catch (err) {
+                console.warn('API error editing question', err);
+            }
+        }
+
+        // LocalStorage fallback
+        let qs = JSON.parse(localStorage.getItem('shsQuestions') || '[]');
+        const idx = qs.findIndex(q => q.id === qData.id);
+        if (idx !== -1) {
+            qs[idx] = qData;
+            localStorage.setItem('shsQuestions', JSON.stringify(qs));
+            return { success: true, message: 'Question updated locally!' };
+        }
+        return { success: false, error: 'Question not found.' };
+    },
+
+    async deleteQuestion(id) {
+        if (this.isOnline) {
+            try {
+                const res = await fetch(`${this.baseUrl}?action=delete_question`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+                return await res.json();
+            } catch (err) {
+                console.warn('API error deleting question', err);
+            }
+        }
+
+        // LocalStorage fallback
+        let qs = JSON.parse(localStorage.getItem('shsQuestions') || '[]');
+        qs = qs.filter(q => q.id !== id);
+        localStorage.setItem('shsQuestions', JSON.stringify(qs));
+        return { success: true, message: 'Question deleted.' };
+    },
+
+    // ==================== SCORES & LEADERBOARD ==================== //
+    async saveScore(scoreData) {
+        if (this.isOnline) {
+            try {
+                const res = await fetch(`${this.baseUrl}?action=save_score`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(scoreData)
+                });
+                return await res.json();
+            } catch (err) {
+                console.warn('API error saving score', err);
+            }
+        }
+
+        // LocalStorage fallback
+        let lb = JSON.parse(localStorage.getItem('lbV2') || '[]');
+        lb.push({
+            n: scoreData.student_name,
+            s: scoreData.score,
+            t: scoreData.total_questions,
+            pct: Math.round((scoreData.score / scoreData.total_questions) * 100),
+            pts: scoreData.points_earned,
+            subject: scoreData.subject || 'General',
+            grade: scoreData.grade || '11',
+            d: new Date().toLocaleDateString()
+        });
+        lb.sort((a,b) => (b.s/b.t) - (a.s/a.t));
+        localStorage.setItem('lbV2', JSON.stringify(lb.slice(0, 25)));
+        return { success: true };
+    },
+
+    async getLeaderboard() {
+        if (this.isOnline) {
+            try {
+                const res = await fetch(`${this.baseUrl}?action=get_leaderboard`);
+                const data = await res.json();
+                if (data.success && data.leaderboard) {
+                    return data.leaderboard;
+                }
+            } catch (err) {
+                console.warn('API error getting leaderboard', err);
+            }
+        }
+
+        // Offline fallback: build ranking from all saved student accounts
+        const allUsers = JSON.parse(localStorage.getItem('allAccounts') || '[]');
+        const students = allUsers.filter(a => a.role === 'student');
+        // Return in new format so renderLB works
+        return students.map(s => ({
+            name: s.name || s.username,
+            username: s.username,
+            total_points: s.points || 0,
+            level: s.level || 1,
+            accuracy: 0,
+            quizzes: 0,
+            badges: 0
+        })).sort((a, b) => b.total_points - a.total_points);
+    },
+
+    // ==================== USER PROGRESS ==================== //
+    async getUserProgress(userId, username) {
+        if (this.isOnline) {
+            try {
+                const res = await fetch(`${this.baseUrl}?action=get_user_progress&user_id=${userId}&username=${encodeURIComponent(username)}`);
+                const data = await res.json();
+                if (data.success && data.progress) {
+                    return data.progress;
+                }
+            } catch (err) {
+                console.warn('API error getting user progress', err);
+            }
+        }
+
+        let d = JSON.parse(localStorage.getItem('userV2') || '{}');
+        if (!d.points) {
+            d = {
+                points: 0, level: 1, lives: 5, maxLives: 5, streak: 0, bestStreak: 0,
+                totalQs: 0, correctQs: 0, pu: { p50: 3, skip: 2, hint: 2, sec: 1 },
+                badges: [], subj: {}, dailyDone: null
+            };
+        }
+        return d;
+    },
+
+    async saveUserProgress(userId, username, progress) {
+        localStorage.setItem('userV2', JSON.stringify(progress));
+
+        if (this.isOnline) {
+            try {
+                await fetch(`${this.baseUrl}?action=save_user_progress`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, username, progress })
+                });
+            } catch (err) {
+                console.warn('API error saving progress', err);
+            }
+        }
+    },
+
+    // ==================== ADMIN MONITORING ==================== //
+    async getAdminStats() {
+        if (this.isOnline) {
+            try {
+                const res = await fetch(`${this.baseUrl}?action=get_admin_stats`);
+                const data = await res.json();
+                if (data.success) return data.stats;
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+        return {
+            totalStudents: JSON.parse(localStorage.getItem('allAccounts')||'[]').filter(a=>a.role==='student').length,
+            totalQuestions: JSON.parse(localStorage.getItem('shsQuestions')||'[]').length,
+            totalQuizzes: JSON.parse(localStorage.getItem('lbV2')||'[]').length,
+            avgAccuracy: 85.0
+        };
+    },
+
+    async getStudentRecords() {
+        if (this.isOnline) {
+            try {
+                const res = await fetch(`${this.baseUrl}?action=get_student_records`);
+                const data = await res.json();
+                if (data.success) return data.students;
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+        return JSON.parse(localStorage.getItem('allAccounts')||'[]')
+            .filter(a=>a.role==='student')
+            .map(s => ({
+                id: s.id || 0,
+                name: s.name,
+                username: s.username,
+                created_at: new Date().toLocaleDateString(),
+                points: 0,
+                level: 1,
+                quizzes_taken: 0,
+                best_pct: 0
+            }));
+    },
+
+    async getQuizHistory() {
+        if (this.isOnline) {
+            try {
+                const res = await fetch(`${this.baseUrl}?action=get_quiz_history`);
+                const data = await res.json();
+                if (data.success) return data.history;
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+        return JSON.parse(localStorage.getItem('lbV2')||'[]').map((l, i) => ({
+            id: i + 1,
+            student_name: l.n,
+            grade: l.grade || '11',
+            subject: l.subject || 'General',
+            difficulty: 'All',
+            score: l.s,
+            total_questions: l.t,
+            percentage: l.pct,
+            points_earned: l.pts || (l.s * 10),
+            created_at: l.d
+        }));
+    },
+
+    async deleteScore(id) {
+        if (this.isOnline) {
+            try {
+                const res = await fetch(`${this.baseUrl}?action=delete_score`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+                return await res.json();
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+        return { success: true };
+    },
+
+    // ==================== SAFE LOGOUT ==================== //
+    logout() {
+        // Tell the server to destroy the session too (fire-and-forget —
+        // don't block the redirect if it's offline).
+        fetch(`${this.baseUrl}?action=logout`).catch(() => {});
+        // ONLY clear user session keys, NEVER clear all questions or all users!
+        localStorage.removeItem('loggedInRole');
+        localStorage.removeItem('loggedInUser');
+        localStorage.removeItem('studentName');
+        localStorage.removeItem('userId');
+        window.location.href = 'login.html';
+    }
+};
+
+// ==================== PWA SERVICE WORKER & INSTALL BANNER ==================== //
+if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').then(reg => {
+            console.log('✅ ESCR Quiz App PWA Service Worker Registered!');
+        }).catch(err => {
+            console.log('SW note:', err);
+        });
+    });
+}
+
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    renderInstallBanner();
+});
+
+function renderInstallBanner() {
+    if (document.getElementById('pwaInstallBanner')) return;
+    const banner = document.createElement('div');
+    banner.id = 'pwaInstallBanner';
+    banner.style.position = 'fixed';
+    banner.style.bottom = '52px';
+    banner.style.left = '50%';
+    banner.style.transform = 'translateX(-50%)';
+    banner.style.backgroundColor = '#740202';
+    banner.style.color = '#ffffff';
+    banner.style.padding = '10px 18px';
+    banner.style.borderRadius = '30px';
+    banner.style.boxShadow = '0 6px 20px rgba(0,0,0,0.35)';
+    banner.style.display = 'flex';
+    banner.style.alignItems = 'center';
+    banner.style.gap = '10px';
+    banner.style.zIndex = '99999';
+    banner.style.fontSize = '13px';
+    banner.style.fontWeight = 'bold';
+    banner.style.cursor = 'pointer';
+
+    banner.innerHTML = `
+        <span>ðŸ“² Install App on this Device</span>
+        <button style="background:#f6e05e; color:#740202; border:none; padding:6px 14px; border-radius:15px; font-weight:bold; cursor:pointer;">Install</button>
+        <span style="font-size:18px; margin-left:6px; opacity:0.8;" onclick="event.stopPropagation(); document.getElementById('pwaInstallBanner').remove();">Ã—</span>
+    `;
+
+    banner.onclick = async () => {
+        if (deferredInstallPrompt) {
+            deferredInstallPrompt.prompt();
+            const { outcome } = await deferredInstallPrompt.userChoice;
+            if (outcome === 'accepted') {
+                banner.remove();
+            }
+            deferredInstallPrompt = null;
+        }
+    };
+
+    document.body.appendChild(banner);
+}
+
+// Auto-initialize API connection on page load
+document.addEventListener('DOMContentLoaded', () => {
+    API.init();
+});
+
+</script>
+
+<script>
+// ========== DATA HELPERS & USER SESSION ==========
+const studentName = localStorage.getItem('studentName') || localStorage.getItem('loggedInUser') || 'Student';
+const role = localStorage.getItem('loggedInRole');
+const userId = parseInt(localStorage.getItem('userId') || '0', 10);
+
+if (!role) { 
+    alert('âŒ Please log in first!'); 
+    window.location.href = 'login.html'; 
+}
+
+// Master Badge Definitions
+const BADGE_DEFINITIONS = [
+    { id: 'first_step', name: 'First Step', icon: 'ðŸ”°', desc: 'Answered your first quiz question', condition: u => (u.totalQs || 0) >= 1 },
+    { id: 'novice_scholar', name: 'Novice Scholar', icon: 'ðŸŽ“', desc: 'Answered at least 5 questions', condition: u => (u.totalQs || 0) >= 5 },
+    { id: 'dedicated_scholar', name: 'Dedicated Scholar', icon: 'ðŸ“œ', desc: 'Answered at least 15 questions', condition: u => (u.totalQs || 0) >= 15 },
+    { id: 'streak_novice', name: 'On Fire', icon: 'ðŸ”¥', desc: 'Achieved a streak of 3 correct answers', condition: u => (u.bestStreak || 0) >= 3 },
+    { id: 'streak_master', name: 'Quiz Champion', icon: 'âš¡', desc: 'Achieved a streak of 5 correct answers', condition: u => (u.bestStreak || 0) >= 5 },
+    { id: 'century_club', name: 'Century Club', icon: 'ðŸŒŸ', desc: 'Earned 100 total points', condition: u => (u.points || 0) >= 100 },
+    { id: 'grand_scholar', name: 'Grand Scholar', icon: 'ðŸ’Ž', desc: 'Earned 250 total points', condition: u => (u.points || 0) >= 250 },
+    { id: 'legendary_master', name: 'Legendary Master', icon: 'ðŸ‘‘', desc: 'Earned 500 total points', condition: u => (u.points || 0) >= 500 },
+    { id: 'science_star', name: 'Science Prodigy', icon: 'ðŸ”¬', desc: 'Scored 3+ correct answers in Science', condition: u => (u.subj?.Science?.c || 0) >= 3 },
+    { id: 'math_wizard', name: 'Math Wizard', icon: 'ðŸ§®', desc: 'Scored 3+ correct answers in Mathematics', condition: u => (u.subj?.Mathematics?.c || 0) >= 3 },
+    { id: 'english_expert', name: 'English Expert', icon: '🔤', desc: 'Scored 3+ correct answers in English', condition: u => (u.subj?.English?.c || 0) >= 3 },
+    { id: 'filipino_pride', name: 'Bayani ng Wika', icon: 'ðŸ‡µðŸ‡­', desc: 'Scored 3+ correct answers in Filipino', condition: u => (u.subj?.Filipino?.c || 0) >= 3 },
+    { id: 'social_thinker', name: 'Social Thinker', icon: 'ðŸ›ï¸', desc: 'Scored 3+ correct in Social Science', condition: u => (u.subj?.['Social Science']?.c || 0) >= 3 },
+    { id: 'ident_pro', name: 'Direct Thinker', icon: 'âœï¸', desc: 'Got 3+ correct in Identification questions', condition: u => (u.typeStats?.identification?.c || 0) >= 3 },
+    { id: 'daily_hero', name: 'Daily Hero', icon: '📅', desc: 'Completed a Daily Challenge bonus quiz', condition: u => !!u.dailyDone }
+];
+
+let U = {
+    points: 0, level: 1, lives: 5, maxLives: 5, streak: 0, bestStreak: 0,
+    totalQs: 0, correctQs: 0, pu: { p50: 3, skip: 2, hint: 2, sec: 1 },
+    badges: [], subj: {}, typeStats: { multiple_choice: {t:0,c:0}, true_false: {t:0,c:0}, identification: {t:0,c:0} },
+    dailyDone: null
+};
+
+// INITIALIZE USER DATA
+async function initUser() {
+    const data = await API.getUserProgress(userId, studentName);
+    if (data) {
+        U = Object.assign(U, data);
+        if (!U.typeStats) {
+            U.typeStats = { multiple_choice: {t:0,c:0}, true_false: {t:0,c:0}, identification: {t:0,c:0} };
+        }
+    }
+    document.getElementById('userName').textContent = studentName;
+    document.getElementById('avatar').textContent = studentName[0]?.toUpperCase() || 'S';
+    refreshUI();
+    checkBadges(false);
+}
+
+function saveUser(d) {
+    U = d;
+    API.saveUserProgress(userId, studentName, U);
+    refreshUI();
+}
+
+// TAB SWITCHING
+async function switchTab(name) {
+    document.querySelectorAll('[id^="tab-"]').forEach(t => t.classList.add('hidden'));
+    const target = document.getElementById('tab-' + name);
+    if (target) target.classList.remove('hidden');
+
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    if (window.event && window.event.target) {
+        window.event.target.classList.add('active');
+    }
+
+    if (name === 'leader') await renderLB();
+    if (name === 'badges') renderBadges();
+    if (name === 'stats') renderStats();
+    if (name === 'daily') {
+        if (U.dailyDone === new Date().toDateString()) {
+            document.getElementById('dailyBtn').disabled = true;
+            document.getElementById('dailyMsg').style.display = 'block';
+        }
+    }
+}
+
+// ========== QUIZ LOGIC ==========
+let Qs = [], idx = 0, score = 0, ans = false, sel = -1, tLeft = 30, tTimer = null, usedPU = false;
+let currentSelectedGrade = 'all', currentSelectedSubject = 'all', currentSelectedDiff = 'all', currentSelectedType = 'all';
+
+async function beginQuiz() {
+    if (U.lives <= 0) {
+        return alert("âŒ No lives left! Come back later or reset your streak.");
+    }
+
+    currentSelectedGrade = document.getElementById('selGrade').value;
+    currentSelectedSubject = document.getElementById('selSubject').value;
+    currentSelectedType = document.getElementById('selType').value;
+    currentSelectedDiff = document.getElementById('selDiff').value;
+
+    const startBtn = document.querySelector('#setupCard button');
+    if (startBtn) startBtn.textContent = 'â³ Loading questions...';
+
+    Qs = await API.getQuestions(currentSelectedGrade, currentSelectedSubject, currentSelectedDiff, currentSelectedType);
+
+    if (startBtn) startBtn.textContent = 'â–¶ï¸ Start Quiz';
+
+    if (!Qs || !Qs.length) {
+        return alert("⚠️ï¸ No questions found for this selection. Try choosing 'All' or add questions in Admin Dashboard!");
+    }
+
+    // Shuffle and take up to 10
+    Qs.sort(() => Math.random() - 0.5);
+    Qs = Qs.slice(0, Math.min(10, Qs.length));
+
+    idx = 0; score = 0; ans = false; usedPU = false;
+    document.getElementById('setupCard').classList.add('hidden');
+    document.getElementById('resultCard').classList.add('hidden');
+    document.getElementById('quizCard').classList.remove('hidden');
+    document.getElementById('qTotal').textContent = Qs.length;
+    showQ();
+}
+
+// DISPLAY CURRENT QUESTION ACCORDING TO TYPE
+function showQ() {
+    ans = false; sel = -1; usedPU = false;
+    document.getElementById('expBox').innerHTML = '';
+    document.getElementById('nextBtn').classList.add('hidden');
+
+    const q = Qs[idx];
+    document.getElementById('qNum').textContent = idx + 1;
+    document.getElementById('qText').textContent = q.question;
+    document.getElementById('qProgress').style.width = `${((idx + 1) / Qs.length) * 100}%`;
+
+    // Question Type Badge
+    const badgeEl = document.getElementById('qTypeBadge');
+    if (q.type === 'identification') {
+        badgeEl.textContent = 'âœï¸ Identification';
+        badgeEl.className = 'q-badge q-badge-id';
+    } else if (q.type === 'true_false') {
+        badgeEl.textContent = 'âš–ï¸ True or False';
+        badgeEl.className = 'q-badge q-badge-tf';
+    } else {
+        badgeEl.textContent = '🔤 Multiple Choice';
+        badgeEl.className = 'q-badge q-badge-mc';
+    }
+
+    renderLives();
+    renderPU();
+    document.getElementById('qStreak').textContent = U.streak;
+
+    const box = document.getElementById('optsBox');
+    box.innerHTML = '';
+
+    // ================= QUESTION TYPE 1: IDENTIFICATION (NO CHOICES!) =================
+    if (q.type === 'identification') {
+        box.innerHTML = `
+            <div class="ident-box">
+                <label style="color:#718096; margin-bottom:8px; display:block; font-size:13px;">
+                    âœï¸ Type your answer below (No choices provided):
+                </label>
+                <div style="display:flex; gap:8px;">
+                    <input type="text" id="identInput" class="ident-input" placeholder="Enter answer here..." autocomplete="off">
+                    <button type="button" class="btn btn-primary" style="width:auto; padding:0 22px; margin:0;" onclick="submitIdent()">Submit</button>
+                </div>
+            </div>
+        `;
+        const input = document.getElementById('identInput');
+        if (input) {
+            input.focus();
+            input.addEventListener('keydown', e => {
+                if (e.key === 'Enter') submitIdent();
+            });
+        }
+    }
+    // ================= QUESTION TYPE 2: TRUE OR FALSE =================
+    else if (q.type === 'true_false') {
+        ['True', 'False'].forEach((txt, i) => {
+            const d = document.createElement('div');
+            d.className = 'option';
+            d.style.textAlign = 'center';
+            d.style.fontSize = '17px';
+            d.style.fontWeight = 'bold';
+            d.innerHTML = i === 0 ? '✅ True' : 'âŒ False';
+            d.onclick = () => pick(i, d);
+            box.appendChild(d);
+        });
+    }
+    // ================= QUESTION TYPE 3: MULTIPLE CHOICE =================
+    else {
+        q.choices.forEach((txt, i) => {
+            const lbl = ['A', 'B', 'C', 'D'][i];
+            const d = document.createElement('div');
+            d.className = 'option';
+            d.textContent = `${lbl}) ${txt}`;
+            d.onclick = () => pick(i, d);
+            box.appendChild(d);
+        });
+    }
+
+    startClock();
+}
+
+// COUNTDOWN TIMER
+function startClock() {
+    tLeft = 30;
+    clearInterval(tTimer);
+    document.getElementById('qTimer').textContent = `â±ï¸ ${tLeft}s`;
+    tTimer = setInterval(() => {
+        tLeft--;
+        document.getElementById('qTimer').textContent = `â±ï¸ ${tLeft}s`;
+        if (tLeft <= 0) {
+            clearInterval(tTimer);
+            timeUp();
+        }
+    }, 1000);
+}
+
+// TIME'S UP
+function timeUp() {
+    if (ans) return;
+    ans = true;
+    U.lives = Math.max(0, U.lives - 1);
+    U.streak = 0;
+    saveUser(U);
+
+    const q = Qs[idx];
+    let correctDisplay = '';
+    if (q.type === 'identification') {
+        correctDisplay = q.correct_text || 'Exact answer';
+    } else if (q.type === 'true_false') {
+        correctDisplay = q.correct === 0 ? 'True' : 'False';
+    } else {
+        correctDisplay = `Option ${['A','B','C','D'][q.correct]}`;
+    }
+
+    document.getElementById('expBox').innerHTML = `<div class="explanation">â° Time's up! Correct answer: <b>${correctDisplay}</b></div>`;
+    document.getElementById('nextBtn').classList.remove('hidden');
+    refreshUI();
+}
+
+// PICK ANSWER (MULTIPLE CHOICE & TRUE/FALSE)
+function pick(i, el) {
+    if (ans) return;
+    ans = true;
+    clearInterval(tTimer);
+    sel = i;
+
+    const q = Qs[idx];
+    const opts = document.querySelectorAll('.option');
+    opts.forEach((o, x) => {
+        o.onclick = null;
+        if (x === q.correct) o.classList.add('correct');
+    });
+
+    const isCorrect = (i === q.correct);
+    recordAnswer(isCorrect, q);
+
+    if (!isCorrect) {
+        el.classList.add('wrong');
+    }
+
+    if (q.explanation) {
+        document.getElementById('expBox').innerHTML = `<div class="explanation">💡 ${q.explanation}</div>`;
+    }
+
+    document.getElementById('nextBtn').classList.remove('hidden');
+}
+
+// SUBMIT ANSWER FOR IDENTIFICATION (TYPED)
+function submitIdent() {
+    if (ans) return;
+    const input = document.getElementById('identInput');
+    if (!input) return;
+
+    const val = input.value.trim();
+    if (!val) {
+        return alert("Please type your answer before submitting!");
+    }
+
+    ans = true;
+    clearInterval(tTimer);
+    input.disabled = true;
+
+    const q = Qs[idx];
+    // Check answer against correct_text (allow case-insensitive, trimmed, and aliases separated by semicolon)
+    const normalize = s => s.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").replace(/\s+/g, " ").trim();
+    const userAns = normalize(val);
+    const targetAnswers = (q.correct_text || '').split(';').map(normalize);
+
+    const isCorrect = targetAnswers.includes(userAns) || targetAnswers.some(t => t.length > 2 && (t === userAns || userAns.includes(t)));
+
+    recordAnswer(isCorrect, q);
+
+    if (isCorrect) {
+        input.classList.add('correct');
+        document.getElementById('expBox').innerHTML = `<div class="explanation" style="border-left-color:#2f855a; color:#22543d; background:#f0fff4;">✅ Correct! You identified: <b>${val}</b></div>`;
+    } else {
+        input.classList.add('wrong');
+        document.getElementById('expBox').innerHTML = `
+            <div class="explanation">
+                âŒ Incorrect! Correct answer was: <b>${q.correct_text}</b>
+                ${q.explanation ? '<br>💡 ' + q.explanation : ''}
+            </div>
+        `;
+    }
+
+    document.getElementById('nextBtn').classList.remove('hidden');
+}
+
+// UNIFIED ANSWER RECORDER
+function recordAnswer(isCorrect, q) {
+    U.totalQs = (U.totalQs || 0) + 1;
+    const qType = q.type || 'multiple_choice';
+
+    // Type Stats
+    if (!U.typeStats) U.typeStats = { multiple_choice: {t:0,c:0}, true_false: {t:0,c:0}, identification: {t:0,c:0} };
+    if (!U.typeStats[qType]) U.typeStats[qType] = { t: 0, c: 0 };
+    U.typeStats[qType].t++;
+
+    // Subject Stats
+    if (!U.subj) U.subj = {};
+    if (!U.subj[q.category]) U.subj[q.category] = { t: 0, c: 0 };
+    U.subj[q.category].t++;
+
+    if (isCorrect) {
+        score++;
+        U.streak = (U.streak || 0) + 1;
+        U.correctQs = (U.correctQs || 0) + 1;
+        U.subj[q.category].c++;
+        U.typeStats[qType].c++;
+
+        let pts = q.difficulty === 'Mastery' ? 20 : q.difficulty === 'Difficult' ? 15 : q.difficulty === 'Average' ? 10 : 5;
+        // Bonus for identification (since it's harder!)
+        if (q.type === 'identification') pts += 5;
+        U.points = (U.points || 0) + pts;
+    } else {
+        U.lives = Math.max(0, (U.lives || 5) - 1);
+        U.streak = 0;
+    }
+
+    if (U.streak > (U.bestStreak || 0)) {
+        U.bestStreak = U.streak;
+    }
+
+    checkBadges(true);
+    saveUser(U);
+    refreshUI();
+}
+
+// NEXT QUESTION OR FINISH
+function goNext() {
+    idx++;
+    if (idx < Qs.length) {
+        showQ();
+    } else {
+        showResults();
+    }
+}
+
+// SHOW FINAL RESULTS
+async function showResults() {
+    document.getElementById('quizCard').classList.add('hidden');
+    document.getElementById('resultCard').classList.remove('hidden');
+
+    const pct = Math.round((score / Qs.length) * 100);
+    const ptsEarned = score * 10;
+    U.points = (U.points || 0) + ptsEarned;
+
+    document.getElementById('scoreBig').textContent = `${score}/${Qs.length}`;
+    document.getElementById('scorePct').textContent = `${pct}%`;
+    document.getElementById('scorePts').textContent = `+${ptsEarned} Points`;
+
+    // Check perfectionist badge
+    if (pct === 100 && Qs.length >= 5) {
+        awardBadge('Sharpshooter', '🎯', 'Scored 100% in a quiz session!');
+    }
+
+    await API.saveScore({
+        user_id: userId,
+        student_name: studentName,
+        grade: currentSelectedGrade,
+        subject: currentSelectedSubject,
+        difficulty: currentSelectedDiff,
+        score: score,
+        total_questions: Qs.length,
+        points_earned: ptsEarned
+    });
+
+    checkBadges(true);
+    saveUser(U);
+}
+
+function resetQuiz() {
+    document.getElementById('resultCard').classList.add('hidden');
+    document.getElementById('quizCard').classList.add('hidden');
+    document.getElementById('setupCard').classList.remove('hidden');
+}
+
+// POWER-UPS
+function usePU(type) {
+    if (usedPU) return;
+    if (!U.pu || U.pu[type] <= 0) return alert("âŒ Not enough power-ups remaining!");
+
+    const q = Qs[idx];
+
+    if (type === 'p50') {
+        if (q.type === 'identification') {
+            const firstChar = (q.correct_text || 'A')[0].toUpperCase();
+            alert(`💡 50/50 Clue: Starts with letter "${firstChar}" and has ${q.correct_text.length} characters!`);
+        } else if (q.type === 'true_false') {
+            const opts = document.querySelectorAll('.option');
+            const wrongIdx = q.correct === 0 ? 1 : 0;
+            if (opts[wrongIdx]) {
+                opts[wrongIdx].style.opacity = '0.25';
+                opts[wrongIdx].onclick = null;
+            }
+        } else {
+            const opts = document.querySelectorAll('.option');
+            let rem = 0;
+            for (let i = 0; i < opts.length && rem < 2; i++) {
+                if (i !== q.correct) {
+                    opts[i].style.opacity = '0.25';
+                    opts[i].onclick = null;
+                    rem++;
+                }
+            }
+        }
+    } else if (type === 'skip') {
+        clearInterval(tTimer);
+        alert("â­ï¸ Question skipped!");
+        goNext();
+        return;
+    } else if (type === 'hint') {
+        if (q.type === 'identification') {
+            alert(`💡 Hint: First two letters are: "${(q.correct_text||'').substring(0, 2).toUpperCase()}"!`);
+        } else if (q.type === 'true_false') {
+            alert(`💡 Hint: The statement is ${q.correct === 0 ? 'True' : 'False'}!`);
+        } else {
+            alert(`💡 Hint: Correct answer is Option ${['A','B','C','D'][q.correct]}!`);
+        }
+    } else if (type === 'sec') {
+        alert("🔄 Second chance active! You can try another answer if you make a mistake.");
+        ans = false;
+        usedPU = false;
+        const input = document.getElementById('identInput');
+        if (input) { input.disabled = false; input.classList.remove('wrong'); }
+        return;
+    }
+
+    usedPU = true;
+    U.pu[type]--;
+    saveUser(U);
+    renderPU();
+}
+
+// DAILY CHALLENGE
+async function doDailyChallenge() {
+    const today = new Date().toDateString();
+    if (U.dailyDone === today) {
+        return alert("✅ You already completed today's Daily Challenge! Come back tomorrow.");
+    }
+
+    U.dailyDone = today;
+    U.points = (U.points || 0) + 50;
+    awardBadge('Daily Hero', '📅', 'Completed a Daily Challenge!');
+    saveUser(U);
+
+    currentSelectedGrade = 'all';
+    currentSelectedSubject = 'Daily Challenge';
+    currentSelectedDiff = 'All';
+    currentSelectedType = 'all';
+
+    const all = await API.getQuestions('all', 'all', 'all');
+    Qs = all.sort(() => Math.random() - 0.5).slice(0, 5);
+    idx = 0; score = 0; ans = false;
+
+    document.getElementById('setupCard').classList.add('hidden');
+    document.getElementById('quizCard').classList.remove('hidden');
+    document.getElementById('qTotal').textContent = Qs.length;
+    showQ();
+}
+
+// LEADERBOARD — Shows ALL registered students ranked by total points
+async function renderLB() {
+    const loading = document.getElementById('lbLoading');
+    const table = document.getElementById('lbTable');
+    const empty = document.getElementById('lbEmpty');
+    const b = document.getElementById('lbBody');
+
+    if (loading) loading.style.display = 'block';
+    if (table) table.style.display = 'none';
+    if (empty) empty.style.display = 'none';
+
+    const lb = await API.getLeaderboard();
+    b.innerHTML = '';
+
+    if (loading) loading.style.display = 'none';
+
+    if (!lb.length) {
+        if (empty) empty.style.display = 'block';
+        return;
+    }
+
+    if (table) table.style.display = 'table';
+
+    lb.forEach((r, i) => {
+        const tr = document.createElement('tr');
+        // Medal styling for top 3
+        if (i === 0) tr.style.cssText = 'background:#fef3c7; font-weight:bold;';
+        else if (i === 1) tr.style.cssText = 'background:#f0f4f8; font-weight:bold;';
+        else if (i === 2) tr.style.cssText = 'background:#fff0f0; font-weight:bold;';
+
+        const rankIcon = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`;
+        const isMe = r.name === studentName;
+        const nameTd = isMe ? `<b style="color:#c53030;">⭐ ${r.name} (You)</b>` : r.name;
+
+        // New API format: name, total_points, level, accuracy, quizzes, badges
+        if (r.total_points !== undefined) {
+            tr.innerHTML = `
+                <td><b>${rankIcon}</b></td>
+                <td>${nameTd}</td>
+                <td><b style="color:#9b2c2c;">${r.total_points} pts</b></td>
+                <td>Lv.${r.level}</td>
+                <td>${r.accuracy}%</td>
+                <td>${r.quizzes}</td>
+                <td>${r.badges} 🏅</td>
+            `;
+        } else {
+            // Fallback for old score-based format
+            const pct = r.pct !== undefined ? r.pct : Math.round((r.s / r.t) * 100);
+            tr.innerHTML = `
+                <td><b>${rankIcon}</b></td>
+                <td>${nameTd}</td>
+                <td><b style="color:#9b2c2c;">${r.pts || (r.s * 10)} pts</b></td>
+                <td>—</td>
+                <td>${pct}%</td>
+                <td>—</td>
+                <td>—</td>
+            `;
+        }
+        b.appendChild(tr);
+    });
+}
+
+
+// ================= BADGES SYSTEM =================
+function checkBadges(notify = true) {
+    if (!U.badges) U.badges = [];
+
+    BADGE_DEFINITIONS.forEach(b => {
+        if (!U.badges.includes(b.name) && b.condition(U)) {
+            U.badges.push(b.name);
+            if (notify) {
+                showBadgeToast(`🎉 Badge Unlocked: ${b.icon} ${b.name}!`);
+            }
+        }
+    });
+}
+
+function awardBadge(name, icon, desc) {
+    if (!U.badges) U.badges = [];
+    if (!U.badges.includes(name)) {
+        U.badges.push(name);
+        showBadgeToast(`🎉 Achievement Unlocked: ${icon} ${name}!`);
+    }
+}
+
+function showBadgeToast(msg) {
+    const t = document.getElementById('badgeToast');
+    t.textContent = msg;
+    t.style.display = 'block';
+    setTimeout(() => { t.style.display = 'none'; }, 3200);
+}
+
+function renderBadges() {
+    const grid = document.getElementById('badgesGrid');
+    grid.innerHTML = '';
+
+    BADGE_DEFINITIONS.forEach(b => {
+        const isUnlocked = U.badges && U.badges.includes(b.name);
+        const card = document.createElement('div');
+        card.className = `badge ${isUnlocked ? 'unlocked' : 'locked'}`;
+        card.innerHTML = `
+            <div class="badge-icon">${b.icon}</div>
+            <div class="badge-name">${b.name}</div>
+            <div class="badge-desc">${b.desc}</div>
+            <div class="badge-status ${isUnlocked ? 'status-unlocked' : 'status-locked'}">
+                ${isUnlocked ? '✅ Unlocked' : '🔒 Locked'}
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+// ================= STATISTICS SYSTEM =================
+function renderStats() {
+    const total = U.totalQs || 0;
+    const correct = U.correctQs || 0;
+    const acc = total ? Math.round((correct / total) * 100) : 0;
+
+    document.getElementById('sTotal').textContent = total;
+    document.getElementById('sAcc').textContent = acc + '%';
+    document.getElementById('sStreak').textContent = U.bestStreak || 0;
+    document.getElementById('sPts').textContent = U.points || 0;
+
+    // Subjects performance analysis
+    const subjects = ['Science', 'Mathematics', 'English', 'Filipino', 'Social Science'];
+    let subjList = [];
+
+    subjects.forEach(s => {
+        const data = (U.subj && U.subj[s]) || { t: 0, c: 0 };
+        const sPct = data.t ? Math.round((data.c / data.t) * 100) : 0;
+        subjList.push({ name: s, total: data.t, correct: data.c, pct: sPct });
+    });
+
+    // Sort by percentage
+    const activeSubjs = subjList.filter(s => s.total > 0);
+    if (activeSubjs.length) {
+        activeSubjs.sort((a, b) => b.pct - a.pct);
+        document.getElementById('strongList').textContent = `${activeSubjs[0].name} (${activeSubjs[0].pct}% accuracy)`;
+        document.getElementById('weakList').textContent = `${activeSubjs[activeSubjs.length - 1].name} (${activeSubjs[activeSubjs.length - 1].pct}% accuracy)`;
+    } else {
+        document.getElementById('strongList').textContent = 'Take a quiz to reveal strong subjects';
+        document.getElementById('weakList').textContent = 'Take a quiz to reveal practice areas';
+    }
+
+    // Render Subject Stats Table
+    let sHtml = '<table><thead><tr><th>Subject</th><th>Answered</th><th>Correct</th><th>Accuracy</th></tr></thead><tbody>';
+    subjList.forEach(s => {
+        sHtml += `<tr>
+            <td><b>${s.name}</b></td>
+            <td>${s.total}</td>
+            <td>${s.correct}</td>
+            <td><b style="color:${s.pct >= 75 ? '#2f855a' : '#c53030'};">${s.pct}%</b></td>
+        </tr>`;
+    });
+    sHtml += '</tbody></table>';
+    document.getElementById('subjStatsTable').innerHTML = sHtml;
+
+    // Render Question Type Stats Table
+    const types = [
+        { key: 'multiple_choice', label: '🔤 Multiple Choice' },
+        { key: 'true_false', label: '⚖️ True or False' },
+        { key: 'identification', label: '✍️ Identification' }
+    ];
+    let tHtml = '<table><thead><tr><th>Question Type</th><th>Answered</th><th>Correct</th><th>Accuracy</th></tr></thead><tbody>';
+    types.forEach(tp => {
+        const data = (U.typeStats && U.typeStats[tp.key]) || { t: 0, c: 0 };
+        const tPct = data.t ? Math.round((data.c / data.t) * 100) : 0;
+        tHtml += `<tr>
+            <td><b>${tp.label}</b></td>
+            <td>${data.t}</td>
+            <td>${data.c}</td>
+            <td><b style="color:${tPct >= 75 ? '#2f855a' : '#c53030'};">${tPct}%</b></td>
+        </tr>`;
+    });
+    tHtml += '</tbody></table>';
+    document.getElementById('typeStatsTable').innerHTML = tHtml;
+}
+
+// UI HELPERS
+function refreshUI() {
+    document.getElementById('uPoints').textContent = U.points || 0;
+    document.getElementById('uLevel').textContent = Math.floor((U.points || 0) / 100) + 1;
+    document.getElementById('uLives').textContent = U.lives !== undefined ? U.lives : 5;
+    document.getElementById('uStreak').textContent = U.streak || 0;
+    renderLives();
+}
+
+function renderLives() {
+    const lives = U.lives !== undefined ? U.lives : 5;
+    const max = U.maxLives || 5;
+    document.getElementById('livesDisp').textContent = '❤️'.repeat(lives) + '🖤'.repeat(Math.max(0, max - lives));
+}
+
+function renderPU() {
+    if (!U.pu) U.pu = { p50: 3, skip: 2, hint: 2, sec: 1 };
+    document.getElementById('c50').textContent = U.pu.p50;
+    document.getElementById('cSkip').textContent = U.pu.skip;
+    document.getElementById('cHint').textContent = U.pu.hint;
+    document.getElementById('cSec').textContent = U.pu.sec;
+}
+
+function logout() {
+    if (confirm('Are you sure you want to exit?')) {
+        API.logout();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initUser();
+});
+</script>
+</body>
+</html>

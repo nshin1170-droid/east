@@ -1,0 +1,865 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- PAGE SETUP AND RESPONSIVE DISPLAY -->
+    <meta charset="UTF-8">
+    <!-- Ensures proper scaling on all devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- PWA CONFIGURATION -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#9b2c2c">
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+    <!-- START OF STYLING RULES -->
+    <style>
+        /* GLOBAL STYLES — applies to all elements */
+        * {
+            box-sizing: border-box; /* Include padding and border in total width/height */
+            margin: 0;              /* Remove default margin */
+            padding: 0;             /* Remove default padding */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Font for whole page */
+            -webkit-tap-highlight-color: transparent; /* Remove highlight on mobile tap */
+        }
+
+        /* MAKE PAGE FULL HEIGHT */
+        html, body { height: 100%; }
+
+        /* BODY STYLES — background and centering */
+        body {
+            background: linear-gradient(135deg, #c53030, #9b2c2c); /* Red gradient background matching school theme */
+            display: flex;           /* Use flexbox for centering */
+            justify-content: center; /* Center horizontally */
+            align-items: center;     /* Center vertically */
+            padding: 16px;           /* Spacing from screen edges on mobile */
+            min-height: 100vh;       /* Cover full viewport height */
+        }
+
+        /* LOGIN BOX — white rounded container */
+        .box {
+            background: white;       /* White background */
+            border-radius: 20px;     /* Large rounded corners */
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15); /* Soft shadow for depth */
+            padding: 28px 22px;      /* Inner spacing */
+            width: 100%;             /* Full width on small screens */
+            max-width: 420px;        /* Limit width on large screens */
+        }
+
+        /* MAIN HEADING */
+        h1 {
+            text-align: center;      /* Center align text */
+            color: #9b2c2c;          /* Dark red color */
+            margin-bottom: 6px;      /* Space below heading */
+            font-size: clamp(18px, 5vw, 22px); /* Responsive font size */
+            line-height: 1.3;        /* Line height for readability */
+        }
+
+        /* SUBTITLE TEXT BELOW HEADING */
+        .subtitle {
+            text-align: center;      /* Center align text */
+            color: #718096;          /* Gray text color */
+            margin-bottom: 18px;     /* Space below subtitle */
+            font-size: clamp(14px, 3.8vw, 16px); /* Responsive font size */
+        }
+
+        /* ROLE SELECTION TABS — Student / Admin */
+        .role-tabs {
+            display: flex;           /* Side-by-side tabs */
+            margin-bottom: 18px;     /* Space below tabs */
+            border-bottom: 2px solid #e2e8f0; /* Bottom border line */
+        }
+
+        /* INDIVIDUAL TAB STYLE */
+        .tab {
+            flex: 1;                 /* Equal width for both tabs */
+            padding: 10px 6px;       /* Inner spacing */
+            text-align: center;      /* Center text inside tab */
+            cursor: pointer;         /* Hand cursor on hover */
+            font-weight: 600;        /* Semi-bold text */
+            color: #718096;          /* Gray text when inactive */
+            font-size: clamp(14px, 3.8vw, 16px); /* Responsive font size */
+            transition: all 0.25s;   /* Smooth color transition */
+        }
+
+        /* ACTIVE TAB — currently selected role */
+        .tab.active {
+            color: #c53030;          /* Red text color */
+            border-bottom: 3px solid #c53030; /* Thick red underline */
+        }
+
+        /* FORM GROUP — label + input container */
+        .form-group { margin-bottom: 14px; }
+
+        /* INPUT LABEL TEXT */
+        label {
+            display: block;          /* Full width block element */
+            margin-bottom: 6px;      /* Space below label */
+            color: #2d3748;          /* Dark gray text */
+            font-weight: 500;        /* Medium font weight */
+            font-size: clamp(14px, 3.7vw, 15px); /* Responsive font size */
+        }
+
+        /* INPUT FIELDS AND DROPDOWN */
+        input, select {
+            width: 100%;             /* Full width of container */
+            padding: 14px 15px;      /* Inner spacing */
+            border: 2px solid #e2e8f0; /* Light gray border */
+            border-radius: 12px;     /* Rounded corners */
+            font-size: 16px;         /* Text size */
+            transition: border 0.25s; /* Smooth border color change */
+        }
+
+        /* FOCUS STATE — when input is selected */
+        input:focus, select:focus {
+            outline: none;           /* Remove default outline */
+            border-color: #c53030;   /* Red border when active */
+        }
+
+        /* MAIN BUTTON — Log In / Create Account */
+        button {
+            width: 100%;             /* Full width */
+            padding: 15px;           /* Inner spacing */
+            background: linear-gradient(135deg, #c53030, #9b2c2c); /* Red gradient */
+            color: white;            /* White text */
+            border: none;            /* Remove border */
+            border-radius: 12px;     /* Rounded corners */
+            font-size: clamp(16px, 4.2vw, 18px); /* Responsive font size */
+            font-weight: 600;        /* Semi-bold text */
+            cursor: pointer;         /* Hand cursor on hover */
+            margin-top: 6px;         /* Space above button */
+            transition: transform 0.2s; /* Smooth click animation */
+        }
+
+        /* BUTTON CLICK EFFECT */
+        button:active { transform: scale(0.97); } /* Slight shrink when pressed */
+
+        /* ERROR MESSAGE TEXT */
+        .error {
+            color: #c53030;          /* Red text */
+            margin-top: 12px;        /* Space above message */
+            text-align: center;      /* Center text */
+            display: none;           /* Hidden by default */
+            font-size: 14px;         /* Text size */
+        }
+
+        /* SUCCESS MESSAGE TEXT */
+        .success {
+            color: #2f855a;          /* Green text */
+            margin-top: 12px;        /* Space above message */
+            text-align: center;      /* Center text */
+            display: none;           /* Hidden by default */
+            font-size: 14px;         /* Text size */
+        }
+
+        /* DIVIDER — "Don't have an account?" line */
+        .divider {
+            text-align: center;      /* Center text */
+            margin: 24px 0 16px;     /* Vertical spacing */
+            position: relative;      /* For positioning the line */
+        }
+
+        /* HORIZONTAL LINE BEHIND DIVIDER TEXT */
+        .divider::before {
+            content: '';             /* Required for pseudo-element */
+            position: absolute;      /* Position across full width */
+            left: 0;
+            top: 50%;                /* Vertically center line */
+            width: 100%;
+            height: 1px;
+            background: #e2e8f0;     /* Light gray line */
+        }
+
+        /* DIVIDER TEXT — sits on top of line */
+        .divider span {
+            background: white;       /* Cover line with white background */
+            padding: 0 12px;         /* Horizontal spacing to break line */
+            color: #a0aec0;          /* Gray text */
+            font-size: 14px;         /* Text size */
+            position: relative;      /* Ensure text appears above line */
+        }
+
+        /* HINT BOX — shows default account info */
+        .hint {
+            margin-top: 18px;        /* Space above hint */
+            font-size: 13px;         /* Small text */
+            color: #718096;          /* Gray text */
+            text-align: center;      /* Center text */
+            line-height: 1.6;        /* Spacing between lines */
+            background: #f7fafc;     /* Very light gray background */
+            padding: 12px;           /* Inner spacing */
+            border-radius: 10px;     /* Rounded corners */
+        }
+
+        /* LINK BUTTON — Switch to Sign Up / Back to Login */
+        .link-btn {
+            background: #fed7d7;     /* Light red background */
+            color: #9b2c2c;          /* Dark red text */
+            font-size: 15px;         /* Text size */
+            padding: 12px;           /* Inner spacing */
+            margin-top: 8px;         /* Space above button */
+        }
+
+        /* LINK BUTTON HOVER EFFECT */
+        .link-btn:active { background: #feb2b2; } /* Darker red when pressed */
+
+        /* HIDDEN CLASS — hides elements from view */
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+<div class="box">
+    <!-- PAGE HEADING WITH SCHOOL NAME -->
+    <h1>🏫 East Systems Colleges of Rizal<br><span style="font-size:0.85em; color:#740202;">Senior High School Quiz App</span></h1>
+    <p class="subtitle">🎯 Log In or Create an Account</p>
+
+    <!-- === LOG IN FORM — DEFAULT VIEW === -->
+    <div id="loginArea">
+        <!-- STUDENT / ADMIN ROLE TABS -->
+        <div class="role-tabs">
+            <div class="tab active" id="tabStudent" onclick="switchRole('student')">🎓 Student</div>
+            <div class="tab" id="tabAdmin" onclick="switchRole('admin')">⚙️ Admin</div>
+        </div>
+
+        <!-- LOGIN INPUT FIELDS -->
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">👤 Username</label>
+                <input type="text" id="username" required placeholder="Enter your username">
+            </div>
+            <div class="form-group">
+                <label for="password">🔒 Password</label>
+                <input type="password" id="password" required placeholder="Enter your password">
+            </div>
+            <button type="submit">🚀 Log In</button>
+            <div class="error" id="loginErr">❌ Incorrect username or password!</div>
+        </form>
+
+        <!-- SEPARATOR BETWEEN LOGIN AND SIGNUP LINK -->
+        <div class="divider"><span>Don't have an account?</span></div>
+
+        <!-- SWITCH TO SIGN UP FORM BUTTON -->
+        <button type="button" class="link-btn" onclick="showSignup()">✨ Create New Account</button>
+
+        <!-- DEFAULT ADMIN & STUDENT CREDENTIALS HINT -->
+        <div class="hint">
+            <strong>🔑 Default Demo Accounts</strong><br>
+            ⚙️ Admin: <b>admin</b> / <b>admin123</b><br>
+            🎓 Student: <b>student</b> / <b>student123</b>
+        </div>
+    </div>
+
+    <!-- === SIGN UP FORM — HIDDEN BY DEFAULT === -->
+    <div id="signupArea" class="hidden">
+        <h2 style="text-align:center; color:#9b2c2c; margin-bottom:16px; font-size:18px;">✨ Create New Account</h2>
+        <form id="signupForm">
+            <div class="form-group">
+                <label for="fullName">👤 Full Name</label>
+                <input type="text" id="fullName" required placeholder="Enter your full name">
+            </div>
+            <div class="form-group">
+                <label for="suUsername">🏷️ Username</label>
+                <input type="text" id="suUsername" required placeholder="Choose a username">
+            </div>
+            <div class="form-group">
+                <label for="suPassword">🔒 Password</label>
+                <input type="password" id="suPassword" required placeholder="Create a password">
+            </div>
+            <!-- Admin accounts are no longer self-service: only the pre-seeded
+                 admin/admin123 account (and any account created directly in the
+                 database by a real administrator) can have the admin role. -->
+            <input type="hidden" id="suRole" value="student">
+            <button type="submit">✨ Create Account</button>
+            <div class="error" id="suErr"></div>
+            <div class="success" id="suOk">✅ Account created! Please log in...</div>
+        </form>
+        <!-- BACK TO LOGIN FORM BUTTON -->
+        <button type="button" class="link-btn" style="margin-top:12px;" onclick="showLogin()">← Back to Log In</button>
+    </div>
+</div>
+
+<!-- INCLUDE UNIVERSAL API CLIENT -->
+<script>
+/**
+ * East Systems Colleges of Rizal - Quiz App
+ * Universal Frontend API Client & Storage Sync
+ */
+
+const API = {
+    // Detect whether API is reachable.
+    // WebIntoApp wraps the app as a native WebView pointing to a real hosted URL,
+    // so http/https always works there. file:// = opened directly in browser (no server).
+    baseUrl: (function() {
+        const proto = window.location.protocol;
+        if (proto === 'http:' || proto === 'https:') {
+            // Hosted on a real server (local PHP server, or WebIntoApp/cloud hosting)
+            return 'api.php';
+        }
+        // Opened directly as a file — point to local server if running
+        return 'http://localhost:8000/api.php';
+    })(),
+
+    isOnline: false,
+
+    async init() {
+        try {
+            const res = await fetch(`${this.baseUrl}?action=ping`, { cache: 'no-store' });
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success) {
+                    this.isOnline = true;
+                }
+            }
+        } catch (e) {
+            this.isOnline = false;
+        }
+        this.renderStatusBadge();
+        return this.isOnline;
+    },
+
+    renderStatusBadge() {
+        let badge = document.getElementById('apiStatusBadge');
+        if (!badge) {
+            badge = document.createElement('div');
+            badge.id = 'apiStatusBadge';
+            badge.style.position = 'fixed';
+            badge.style.bottom = '12px';
+            badge.style.right = '12px';
+            badge.style.padding = '6px 12px';
+            badge.style.borderRadius = '20px';
+            badge.style.fontSize = '12px';
+            badge.style.fontWeight = '600';
+            badge.style.zIndex = '9999';
+            badge.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+            badge.style.transition = 'all 0.3s';
+            document.body.appendChild(badge);
+        }
+
+        if (this.isOnline) {
+            badge.style.backgroundColor = '#2f855a';
+            badge.style.color = '#ffffff';
+            badge.innerHTML = '🟢 Database Server Online';
+            badge.title = 'Connected to central SQLite/PHP backend database.';
+        } else {
+            badge.style.backgroundColor = '#dd6b20';
+            badge.style.color = '#ffffff';
+            badge.innerHTML = '🟡 Offline (Local Mode)';
+            badge.title = 'Running on browser storage. Start START_APP.bat for full multi-device database.';
+        }
+    },
+
+    // ==================== AUTHENTICATION ==================== //
+    async login(username, password, role) {
+        try {
+            const res = await fetch(`${this.baseUrl}?action=login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password, role })
+            });
+            const data = await res.json();
+            if (data && typeof data === 'object') {
+                if (data.success) {
+                    this.isOnline = true;
+                    this.renderStatusBadge();
+                }
+                return data;
+            }
+        } catch (err) {
+            console.warn('API error, falling back to local auth', err);
+        }
+
+        // LocalStorage fallback
+        const allUsers = JSON.parse(localStorage.getItem('allAccounts') || '[]');
+        if (!allUsers.find(a => a.username === 'admin')) {
+            allUsers.unshift({ username: 'admin', password: 'admin123', role: 'admin', name: 'Administrator' });
+        }
+        const found = allUsers.find(u => u.username === username && u.password === password);
+        if (found && found.role === role) {
+            return { success: true, user: found };
+        }
+        return { success: false, error: 'Incorrect username or password!' };
+    },
+
+    async signup(name, username, password, role) {
+        if (this.isOnline) {
+            try {
+                const res = await fetch(`${this.baseUrl}?action=signup`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, username, password, role })
+                });
+                return await res.json();
+            } catch (err) {
+                console.warn('API error, falling back to local signup', err);
+            }
+        }
+
+        // LocalStorage fallback
+        let allUsers = JSON.parse(localStorage.getItem('allAccounts') || '[]');
+        if (allUsers.find(u => u.username === username)) {
+            return { success: false, error: 'Username already taken!' };
+        }
+        allUsers.push({ name, username, password, role, id: Date.now() });
+        localStorage.setItem('allAccounts', JSON.stringify(allUsers));
+        return { success: true, message: 'Account created successfully!' };
+    },
+
+    // ==================== QUESTIONS ==================== //
+    async getQuestions(grade = 'all', category = 'all', difficulty = 'all', type = 'all') {
+        if (this.isOnline) {
+            try {
+                const url = new URL(this.baseUrl, window.location.href);
+                url.searchParams.set('action', 'get_questions');
+                if (grade !== 'all') url.searchParams.set('grade', grade);
+                if (category !== 'all') url.searchParams.set('category', category);
+                if (difficulty !== 'all') url.searchParams.set('difficulty', difficulty);
+                if (type !== 'all') url.searchParams.set('type', type);
+
+                const res = await fetch(url.toString());
+                const data = await res.json();
+                if (data.success && data.questions) {
+                    return data.questions;
+                }
+            } catch (err) {
+                console.warn('API error getting questions', err);
+            }
+        }
+
+        // LocalStorage fallback
+        let qs = JSON.parse(localStorage.getItem('shsQuestions') || '[]');
+        if (!qs.length) {
+            qs = [
+                {id: 1, grade:"11",category:"Science",difficulty:"Easy",type:"multiple_choice",question:"What is the primary chemical formula for Water?",choices:["H2O","CO2","O2","NaCl"],correct:0,correct_text:"",explanation:"H2O = 2 Hydrogen + 1 Oxygen."},
+                {id: 2, grade:"11",category:"Science",difficulty:"Easy",type:"true_false",question:"Photosynthesis takes place primarily in the chloroplasts of plant cells.",choices:["True","False"],correct:0,correct_text:"",explanation:"Chloroplasts contain chlorophyll."},
+                {id: 3, grade:"11",category:"Science",difficulty:"Easy",type:"identification",question:"What is the chemical symbol for Gold?",choices:[],correct:0,correct_text:"Au",explanation:"Au is from Latin Aurum."},
+                {id: 4, grade:"11",category:"Mathematics",difficulty:"Easy",type:"multiple_choice",question:"What is the product of 7 multiplied by 8?",choices:["54","56","49","63"],correct:1,correct_text:"",explanation:"7 × 8 = 56."},
+                {id: 5, grade:"11",category:"Mathematics",difficulty:"Easy",type:"identification",question:"What is the value of Pi rounded to two decimal places?",choices:[],correct:0,correct_text:"3.14",explanation:"Pi is approximately 3.14."}
+            ];
+            localStorage.setItem('shsQuestions', JSON.stringify(qs));
+        }
+
+        return qs.filter(q => {
+            const okG = grade === 'all' || !q.grade || q.grade === grade;
+            const okS = category === 'all' || q.category === category;
+            const okD = difficulty === 'all' || q.difficulty === difficulty;
+            const okT = type === 'all' || !q.type || q.type === type;
+            return okG && okS && okD && okT;
+        });
+    },
+
+    async addQuestion(qData) {
+        if (this.isOnline) {
+            try {
+                const res = await fetch(`${this.baseUrl}?action=add_question`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(qData)
+                });
+                return await res.json();
+            } catch (err) {
+                console.warn('API error adding question', err);
+            }
+        }
+
+        // LocalStorage fallback
+        const qs = JSON.parse(localStorage.getItem('shsQuestions') || '[]');
+        qData.id = Date.now();
+        qs.unshift(qData);
+        localStorage.setItem('shsQuestions', JSON.stringify(qs));
+        return { success: true, message: 'Question saved locally!' };
+    },
+
+    async editQuestion(qData) {
+        if (this.isOnline) {
+            try {
+                const res = await fetch(`${this.baseUrl}?action=edit_question`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(qData)
+                });
+                return await res.json();
+            } catch (err) {
+                console.warn('API error editing question', err);
+            }
+        }
+
+        // LocalStorage fallback
+        let qs = JSON.parse(localStorage.getItem('shsQuestions') || '[]');
+        const idx = qs.findIndex(q => q.id === qData.id);
+        if (idx !== -1) {
+            qs[idx] = qData;
+            localStorage.setItem('shsQuestions', JSON.stringify(qs));
+            return { success: true, message: 'Question updated locally!' };
+        }
+        return { success: false, error: 'Question not found.' };
+    },
+
+    async deleteQuestion(id) {
+        if (this.isOnline) {
+            try {
+                const res = await fetch(`${this.baseUrl}?action=delete_question`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+                return await res.json();
+            } catch (err) {
+                console.warn('API error deleting question', err);
+            }
+        }
+
+        // LocalStorage fallback
+        let qs = JSON.parse(localStorage.getItem('shsQuestions') || '[]');
+        qs = qs.filter(q => q.id !== id);
+        localStorage.setItem('shsQuestions', JSON.stringify(qs));
+        return { success: true, message: 'Question deleted.' };
+    },
+
+    // ==================== SCORES & LEADERBOARD ==================== //
+    async saveScore(scoreData) {
+        if (this.isOnline) {
+            try {
+                const res = await fetch(`${this.baseUrl}?action=save_score`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(scoreData)
+                });
+                return await res.json();
+            } catch (err) {
+                console.warn('API error saving score', err);
+            }
+        }
+
+        // LocalStorage fallback
+        let lb = JSON.parse(localStorage.getItem('lbV2') || '[]');
+        lb.push({
+            n: scoreData.student_name,
+            s: scoreData.score,
+            t: scoreData.total_questions,
+            pct: Math.round((scoreData.score / scoreData.total_questions) * 100),
+            pts: scoreData.points_earned,
+            subject: scoreData.subject || 'General',
+            grade: scoreData.grade || '11',
+            d: new Date().toLocaleDateString()
+        });
+        lb.sort((a,b) => (b.s/b.t) - (a.s/a.t));
+        localStorage.setItem('lbV2', JSON.stringify(lb.slice(0, 25)));
+        return { success: true };
+    },
+
+    async getLeaderboard() {
+        if (this.isOnline) {
+            try {
+                const res = await fetch(`${this.baseUrl}?action=get_leaderboard`);
+                const data = await res.json();
+                if (data.success && data.leaderboard) {
+                    return data.leaderboard;
+                }
+            } catch (err) {
+                console.warn('API error getting leaderboard', err);
+            }
+        }
+
+        // Offline fallback: build ranking from all saved student accounts
+        const allUsers = JSON.parse(localStorage.getItem('allAccounts') || '[]');
+        const students = allUsers.filter(a => a.role === 'student');
+        // Return in new format so renderLB works
+        return students.map(s => ({
+            name: s.name || s.username,
+            username: s.username,
+            total_points: s.points || 0,
+            level: s.level || 1,
+            accuracy: 0,
+            quizzes: 0,
+            badges: 0
+        })).sort((a, b) => b.total_points - a.total_points);
+    },
+
+    // ==================== USER PROGRESS ==================== //
+    async getUserProgress(userId, username) {
+        if (this.isOnline) {
+            try {
+                const res = await fetch(`${this.baseUrl}?action=get_user_progress&user_id=${userId}&username=${encodeURIComponent(username)}`);
+                const data = await res.json();
+                if (data.success && data.progress) {
+                    return data.progress;
+                }
+            } catch (err) {
+                console.warn('API error getting user progress', err);
+            }
+        }
+
+        let d = JSON.parse(localStorage.getItem('userV2') || '{}');
+        if (!d.points) {
+            d = {
+                points: 0, level: 1, lives: 5, maxLives: 5, streak: 0, bestStreak: 0,
+                totalQs: 0, correctQs: 0, pu: { p50: 3, skip: 2, hint: 2, sec: 1 },
+                badges: [], subj: {}, dailyDone: null
+            };
+        }
+        return d;
+    },
+
+    async saveUserProgress(userId, username, progress) {
+        localStorage.setItem('userV2', JSON.stringify(progress));
+
+        if (this.isOnline) {
+            try {
+                await fetch(`${this.baseUrl}?action=save_user_progress`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, username, progress })
+                });
+            } catch (err) {
+                console.warn('API error saving progress', err);
+            }
+        }
+    },
+
+    // ==================== ADMIN MONITORING ==================== //
+    async getAdminStats() {
+        if (this.isOnline) {
+            try {
+                const res = await fetch(`${this.baseUrl}?action=get_admin_stats`);
+                const data = await res.json();
+                if (data.success) return data.stats;
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+        return {
+            totalStudents: JSON.parse(localStorage.getItem('allAccounts')||'[]').filter(a=>a.role==='student').length,
+            totalQuestions: JSON.parse(localStorage.getItem('shsQuestions')||'[]').length,
+            totalQuizzes: JSON.parse(localStorage.getItem('lbV2')||'[]').length,
+            avgAccuracy: 85.0
+        };
+    },
+
+    async getStudentRecords() {
+        if (this.isOnline) {
+            try {
+                const res = await fetch(`${this.baseUrl}?action=get_student_records`);
+                const data = await res.json();
+                if (data.success) return data.students;
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+        return JSON.parse(localStorage.getItem('allAccounts')||'[]')
+            .filter(a=>a.role==='student')
+            .map(s => ({
+                id: s.id || 0,
+                name: s.name,
+                username: s.username,
+                created_at: new Date().toLocaleDateString(),
+                points: 0,
+                level: 1,
+                quizzes_taken: 0,
+                best_pct: 0
+            }));
+    },
+
+    async getQuizHistory() {
+        if (this.isOnline) {
+            try {
+                const res = await fetch(`${this.baseUrl}?action=get_quiz_history`);
+                const data = await res.json();
+                if (data.success) return data.history;
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+        return JSON.parse(localStorage.getItem('lbV2')||'[]').map((l, i) => ({
+            id: i + 1,
+            student_name: l.n,
+            grade: l.grade || '11',
+            subject: l.subject || 'General',
+            difficulty: 'All',
+            score: l.s,
+            total_questions: l.t,
+            percentage: l.pct,
+            points_earned: l.pts || (l.s * 10),
+            created_at: l.d
+        }));
+    },
+
+    async deleteScore(id) {
+        if (this.isOnline) {
+            try {
+                const res = await fetch(`${this.baseUrl}?action=delete_score`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+                return await res.json();
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+        return { success: true };
+    },
+
+    // ==================== SAFE LOGOUT ==================== //
+    logout() {
+        // Tell the server to destroy the session too (fire-and-forget —
+        // don't block the redirect if it's offline).
+        fetch(`${this.baseUrl}?action=logout`).catch(() => {});
+        // ONLY clear user session keys, NEVER clear all questions or all users!
+        localStorage.removeItem('loggedInRole');
+        localStorage.removeItem('loggedInUser');
+        localStorage.removeItem('studentName');
+        localStorage.removeItem('userId');
+        window.location.href = 'login.html';
+    }
+};
+
+// ==================== PWA SERVICE WORKER & INSTALL BANNER ==================== //
+if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').then(reg => {
+            console.log('✅ ESCR Quiz App PWA Service Worker Registered!');
+        }).catch(err => {
+            console.log('SW note:', err);
+        });
+    });
+}
+
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    renderInstallBanner();
+});
+
+function renderInstallBanner() {
+    if (document.getElementById('pwaInstallBanner')) return;
+    const banner = document.createElement('div');
+    banner.id = 'pwaInstallBanner';
+    banner.style.position = 'fixed';
+    banner.style.bottom = '52px';
+    banner.style.left = '50%';
+    banner.style.transform = 'translateX(-50%)';
+    banner.style.backgroundColor = '#740202';
+    banner.style.color = '#ffffff';
+    banner.style.padding = '10px 18px';
+    banner.style.borderRadius = '30px';
+    banner.style.boxShadow = '0 6px 20px rgba(0,0,0,0.35)';
+    banner.style.display = 'flex';
+    banner.style.alignItems = 'center';
+    banner.style.gap = '10px';
+    banner.style.zIndex = '99999';
+    banner.style.fontSize = '13px';
+    banner.style.fontWeight = 'bold';
+    banner.style.cursor = 'pointer';
+
+    banner.innerHTML = `
+        <span>📲 Install App on this Device</span>
+        <button style="background:#f6e05e; color:#740202; border:none; padding:6px 14px; border-radius:15px; font-weight:bold; cursor:pointer;">Install</button>
+        <span style="font-size:18px; margin-left:6px; opacity:0.8;" onclick="event.stopPropagation(); document.getElementById('pwaInstallBanner').remove();">×</span>
+    `;
+
+    banner.onclick = async () => {
+        if (deferredInstallPrompt) {
+            deferredInstallPrompt.prompt();
+            const { outcome } = await deferredInstallPrompt.userChoice;
+            if (outcome === 'accepted') {
+                banner.remove();
+            }
+            deferredInstallPrompt = null;
+        }
+    };
+
+    document.body.appendChild(banner);
+}
+
+// Auto-initialize API connection on page load
+document.addEventListener('DOMContentLoaded', () => {
+    API.init();
+});
+
+</script>
+
+<script>
+    let currentRole = 'student'; // Track selected role — defaults to Student
+
+    // SWITCH ROLE TAB — Student ↔ Admin
+    function switchRole(role) {
+        currentRole = role; // Update selected role
+        // Toggle active styling on tabs
+        document.getElementById('tabStudent').classList.toggle('active', role === 'student');
+        document.getElementById('tabAdmin').classList.toggle('active', role === 'admin');
+        hideAllMsgs(); // Clear any error/success messages
+    }
+
+    // HIDE ALL ERROR AND SUCCESS MESSAGES
+    function hideAllMsgs() {
+        document.querySelectorAll('.error, .success').forEach(e => e.style.display = 'none');
+    }
+
+    // SHOW SIGNUP FORM — hide login, show signup
+    function showSignup() {
+        document.getElementById('loginArea').classList.add('hidden');
+        document.getElementById('signupArea').classList.remove('hidden');
+        hideAllMsgs();
+    }
+
+    // SHOW LOGIN FORM — hide signup, show login, clear form
+    function showLogin() {
+        document.getElementById('signupArea').classList.add('hidden');
+        document.getElementById('loginArea').classList.remove('hidden');
+        hideAllMsgs();
+        document.getElementById('signupForm').reset();
+    }
+
+    // LOGIN FORM SUBMIT HANDLER — verify credentials with API or fallback
+    document.getElementById('loginForm').addEventListener('submit', async e => {
+        e.preventDefault(); // Stop page reload
+        hideAllMsgs(); // Clear previous messages
+        const uname = document.getElementById('username').value.trim();
+        const pword = document.getElementById('password').value;
+
+        const res = await API.login(uname, pword, currentRole);
+
+        if (res.success && res.user) {
+            localStorage.setItem('loggedInRole', res.user.role);
+            localStorage.setItem('loggedInUser', res.user.username);
+            localStorage.setItem('studentName', res.user.name);
+            localStorage.setItem('userId', res.user.id || 0);
+            window.location.href = res.user.role === 'admin' ? 'admin-dashboard.html' : 'quiz.html';
+        } else {
+            document.getElementById('loginErr').textContent = '❌ ' + (res.error || 'Incorrect username or password!');
+            document.getElementById('loginErr').style.display = 'block';
+        }
+    });
+
+    // SIGNUP FORM SUBMIT HANDLER — create new account via API or fallback
+    document.getElementById('signupForm').addEventListener('submit', async e => {
+        e.preventDefault(); // Stop page reload
+        hideAllMsgs(); // Clear previous messages
+        const name = document.getElementById('fullName').value.trim();
+        const uname = document.getElementById('suUsername').value.trim();
+        const pword = document.getElementById('suPassword').value;
+        const role = document.getElementById('suRole').value;
+
+        if (!name || !uname || !pword) {
+            document.getElementById('suErr').textContent = '❌ Please fill in all fields!';
+            document.getElementById('suErr').style.display = 'block';
+            return;
+        }
+
+        const res = await API.signup(name, uname, pword, role);
+
+        if (res.success) {
+            document.getElementById('suOk').textContent = '✅ ' + (res.message || 'Account created! Please log in...');
+            document.getElementById('suOk').style.display = 'block';
+            e.target.reset();
+            setTimeout(showLogin, 1500);
+        } else {
+            document.getElementById('suErr').textContent = '❌ ' + (res.error || 'Failed to create account.');
+            document.getElementById('suErr').style.display = 'block';
+        }
+    });
+</script>
+</body>
+</html>
+
+

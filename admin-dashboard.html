@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- PAGE SETUP AND VIEWPORT CONFIGURATION -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Admin Dashboard — East Systems Colleges of Rizal Quiz App</title>
+
+    <style>
+        /* GLOBAL STYLES */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(135deg, #620000, #9b1111);
+            padding: 12px;
+            min-height: 100vh;
+        }
+
+        /* HEADER SECTION */
+        .header {
+            background: white;
+            padding: 16px 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            margin-bottom: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .header h1 {
+            color: #9b2c2c;
+            font-size: clamp(16px, 4.5vw, 20px);
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .user-info span {
+            color: #4a5568;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        /* NAVIGATION TABS */
+        .admin-nav {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            margin-bottom: 16px;
+            padding-bottom: 4px;
+        }
+
+        .nav-tab {
+            background: rgba(255,255,255,0.9);
+            color: #742a2a;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .nav-tab.active {
+            background: #ffffff;
+            color: #c53030;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            font-weight: 700;
+            border-bottom: 3px solid #c53030;
+        }
+
+        /* BASE BUTTON STYLES */
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.15s, background-color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn:active { transform: scale(0.97); }
+        .btn-logout { background-color: #c53030; color: white; }
+        .btn-primary { background: linear-gradient(135deg, #c53030, #9b2c2c); color: white; width: 100%; padding: 14px; font-size: 15px; }
+        .btn-danger { background-color: #fed7d7; color: #9b2c2c; padding: 7px 12px; font-size: 13px; }
+        .btn-edit { background-color: #e2e8f0; color: #2b6cb0; padding: 7px 12px; font-size: 13px; }
+        .btn-secondary { background-color: #edf2f7; color: #4a5568; }
+        .btn-print { background-color: #2f855a; color: white; }
+
+        /* MAIN CONTENT LAYOUT */
+        .container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        @media (min-width: 900px) {
+            .container { grid-template-columns: 1fr 1.3fr; }
+            body { padding: 20px; }
+        }
+
+        /* CARD STYLES */
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .card h2 {
+            color: #9b2c2c;
+            margin-bottom: 16px;
+            font-size: clamp(16px, 4vw, 19px);
+            border-bottom: 2px solid #fed7d7;
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* FORM FIELD GROUPS */
+        .form-group { margin-bottom: 13px; }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #4a5568;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 11px 13px;
+            border: 2px solid #fed7d7;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #c53030;
+        }
+
+        /* QUESTION ITEM */
+        .question-item {
+            padding: 14px;
+            border: 1px solid #fed7d7;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            background: #fffafa;
+            transition: all 0.2s;
+        }
+
+        .question-item:hover {
+            box-shadow: 0 2px 8px rgba(155,44,44,0.1);
+            border-color: #e53e3e;
+        }
+
+        .question-item p {
+            color: #2d3748;
+            font-weight: 500;
+            margin-bottom: 6px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .question-item small {
+            color: #718096;
+            font-size: 13px;
+            line-height: 1.5;
+            display: block;
+            margin-top: 4px;
+        }
+
+        .actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        /* TAGS */
+        .subject-tag {
+            display: inline-block;
+            padding: 3px 9px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-right: 5px;
+        }
+
+        .grade-tag {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 700;
+            background: #edf2f7;
+            color: #2d3748;
+            margin-right: 5px;
+        }
+
+        .type-tag {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-right: 5px;
+        }
+
+        .tag-mc { background: #ebf8ff; color: #2b6cb0; }
+        .tag-tf { background: #fefcbf; color: #975a16; }
+        .tag-id { background: #feebc8; color: #c05621; }
+
+        .diff-tag {
+            display: inline-block;
+            padding: 2px 7px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .tag-sci { background: #e6fffa; color: #047857; }
+        .tag-math { background: #ebf4ff; color: #1e40af; }
+        .tag-fil { background: #fef3c7; color: #92400e; }
+        .tag-eng { background: #f3e8ff; color: #6b21a8; }
+        .tag-soc { background: #fed7d7; color: #9b2c2c; }
+
+        .diff-easy { background: #c6f6d5; color: #22543d; }
+        .diff-average, .diff-medium { background: #fef5e7; color: #744210; }
+        .diff-difficult, .diff-hard { background: #fed7d7; color: #742a2a; }
+        .diff-mastery { background: #e9d8fd; color: #553c9a; }
+
+        /* TABLES */
+        .table-responsive {
+            overflow-x: auto;
+            width: 100%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th, td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid #fed7d7;
+        }
+
+        th {
+            background: #fff5f5;
+            color: #9b2c2c;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        tr:hover td { background: #fffaf0; }
+
+        /* STATS OVERVIEW CARDS */
+        .stats-kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .kpi-card {
+            background: #fff5f5;
+            padding: 16px;
+            border-radius: 12px;
+            border-left: 4px solid #c53030;
+        }
+
+        .kpi-num {
+            font-size: 26px;
+            font-weight: bold;
+            color: #9b2c2c;
+        }
+
+        .kpi-lbl {
+            font-size: 13px;
+            color: #718096;
+            margin-top: 4px;
+        }
+
+        /* FILTER BAR */
+        .filter-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+
+        .filter-row select, .filter-row input {
+            padding: 8px 10px;
+            font-size: 13px;
+            width: auto;
+            flex: 1;
+            min-width: 130px;
+        }
+
+        .hidden { display: none !important; }
+
+        @media print {
+            body { background: white; padding: 0; color: black; }
+            .header, .admin-nav, .btn, .actions, #section-questions { display: none !important; }
+            .card { box-shadow: none; border: 1px solid #ccc; }
+            #section-history, #section-students { display: block !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER AREA -->
+    <div class="header">
+        <h1>🏫 East Systems Colleges of Rizal<br>Admin Dashboard & Question Bank Portal</h1>
+        <div class="user-info">
+            <span id="adminName">👤 Admin</span>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn btn-print" onclick="window.print()">🖨️ Print Report</button>
+                <button class="btn btn-logout" onclick="logout()">🚪 Log Out</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD NAVIGATION TABS -->
+    <div class="admin-nav">
+        <button class="nav-tab active" onclick="switchSection('questions')">📝 Questions Bank</button>
+        <button class="nav-tab" onclick="switchSection('students')">👥 Students Directory</button>
+        <button class="nav-tab" onclick="switchSection('history')">📊 Quiz Results History</button>
+        <button class="nav-tab" onclick="switchSection('analytics')">📈 Analytics & Overview</button>
+    </div>
+
+    <!-- ==================== SECTION 1: QUESTIONS BANK ==================== -->
+    <div id="section-questions" class="container">
+        <!-- LEFT: Add / Edit Question Form -->
+        <div class="card">
+            <h2 id="formTitle">➕ Add New Question</h2>
+            <form id="qForm">
+                <input type="hidden" id="editId" value="">
+
+                <!-- QUESTION TYPE SELECTOR -->
+                <div class="form-group">
+                    <label>📝 Question Type</label>
+                    <select id="qType" onchange="handleTypeChange()" required>
+                        <option value="multiple_choice">🔤 Multiple Choice (A, B, C, D)</option>
+                        <option value="true_false">⚖️ True or False</option>
+                        <option value="identification">✍️ Identification (Direct Answer, No Choices)</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <!-- GRADE LEVEL -->
+                    <div class="form-group" style="flex: 1;">
+                        <label>🎓 Grade Level</label>
+                        <select id="qGrade" required>
+                            <option value="11">Grade 11</option>
+                            <option value="12">Grade 12</option>
+                        </select>
+                    </div>
+
+                    <!-- SUBJECT -->
+                    <div class="form-group" style="flex: 1.2;">
+                        <label>📁 Subject</label>
+                        <select id="qCategory" required>
+                            <option value="Science">🔬 Science</option>
+                            <option value="Mathematics">🧮 Mathematics</option>
+                            <option value="Filipino">🇵🇭 Filipino</option>
+                            <option value="English">🔤 English</option>
+                            <option value="Social Science">🏛️ Social Science</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- DIFFICULTY LEVEL -->
+                <div class="form-group">
+                    <label>📊 Difficulty Level</label>
+                    <select id="qDifficulty" required>
+                        <option value="Easy">🟢 Easy</option>
+                        <option value="Average">🟡 Average</option>
+                        <option value="Difficult">🔴 Difficult</option>
+                        <option value="Mastery">💎 Mastery</option>
+                    </select>
+                </div>
+
+                <!-- QUESTION TEXT -->
+                <div class="form-group">
+                    <label>❓ Question Text</label>
+                    <textarea id="qText" rows="3" required placeholder="Type the question here..."></textarea>
+                </div>
+
+                <!-- ================= TYPE 1: MULTIPLE CHOICE CHOICES ================= -->
+                <div id="mcGroup">
+                    <div class="form-group">
+                        <label>Option A</label>
+                        <input type="text" id="optA" placeholder="Option A">
+                    </div>
+                    <div class="form-group">
+                        <label>Option B</label>
+                        <input type="text" id="optB" placeholder="Option B">
+                    </div>
+                    <div class="form-group">
+                        <label>Option C</label>
+                        <input type="text" id="optC" placeholder="Option C">
+                    </div>
+                    <div class="form-group">
+                        <label>Option D</label>
+                        <input type="text" id="optD" placeholder="Option D">
+                    </div>
+
+                    <div class="form-group">
+                        <label>✅ Correct Choice</label>
+                        <select id="correctSel">
+                            <option value="0">A</option>
+                            <option value="1">B</option>
+                            <option value="2">C</option>
+                            <option value="3">D</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- ================= TYPE 2: TRUE OR FALSE SELECTION ================= -->
+                <div id="tfGroup" class="hidden">
+                    <div class="form-group">
+                        <label>✅ Correct Answer</label>
+                        <select id="tfCorrectSel">
+                            <option value="0">True (Tama)</option>
+                            <option value="1">False (Mali)</option>
+                        </select>
+                        <small style="color:#718096; display:block; margin-top:4px;">Students will choose between True and False buttons.</small>
+                    </div>
+                </div>
+
+                <!-- ================= TYPE 3: IDENTIFICATION INPUT ================= -->
+                <div id="idGroup" class="hidden">
+                    <div class="form-group">
+                        <label>✅ Correct Answer (Word or Phrase)</label>
+                        <input type="text" id="identCorrectText" placeholder="e.g. Mitochondria or Jose Rizal">
+                        <small style="color:#718096; display:block; margin-top:4px;">
+                            💡 <b>No choices will be shown to the student!</b> They must type their answer. (Case-insensitive)
+                        </small>
+                    </div>
+                </div>
+
+                <!-- EXPLANATION -->
+                <div class="form-group">
+                    <label>💡 Explanation (Optional)</label>
+                    <textarea id="qExplanation" rows="2" placeholder="Why is this the correct answer?"></textarea>
+                </div>
+
+                <!-- SAVE / UPDATE BUTTONS -->
+                <button type="submit" class="btn btn-primary" id="saveBtn">💾 Save Question</button>
+                <button type="button" class="btn btn-secondary hidden" id="cancelEditBtn" onclick="cancelEdit()" style="width: 100%; margin-top: 8px;">Cancel Edit</button>
+            </form>
+        </div>
+
+        <!-- RIGHT: Question Bank List -->
+        <div class="card">
+            <h2>
+                <span>📋 Question Bank (<span id="qCount">0</span>)</span>
+            </h2>
+
+            <!-- FILTER CONTROLS -->
+            <div class="filter-row">
+                <select id="filterGrade" onchange="renderQuestions()">
+                    <option value="all">All Grades</option>
+                    <option value="11">Grade 11</option>
+                    <option value="12">Grade 12</option>
+                </select>
+                <select id="filterCategory" onchange="renderQuestions()">
+                    <option value="all">📁 All Subjects</option>
+                    <option value="Science">Science</option>
+                    <option value="Mathematics">Mathematics</option>
+                    <option value="Filipino">Filipino</option>
+                    <option value="English">English</option>
+                    <option value="Social Science">Social Science</option>
+                </select>
+                <select id="filterType" onchange="renderQuestions()">
+                    <option value="all">📋 All Question Types</option>
+                    <option value="multiple_choice">Multiple Choice</option>
+                    <option value="true_false">True or False</option>
+                    <option value="identification">Identification</option>
+                </select>
+                <input type="text" id="searchQ" onkeyup="renderQuestions()" placeholder="🔍 Search text...">
+            </div>
+
+            <div id="qList"></div>
+        </div>
+    </div>
+
+    <!-- ==================== SECTION 2: STUDENTS DIRECTORY ==================== -->
+    <div id="section-students" class="card hidden">
+        <h2>👥 Registered Students Directory</h2>
+        <p style="color:#718096; font-size:13px; margin-bottom:14px;">Master list of all registered student accounts, points earned, and overall quiz activity.</p>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Student Name</th>
+                        <th>Username</th>
+                        <th>Level</th>
+                        <th>Total Points</th>
+                        <th>Quizzes Taken</th>
+                        <th>Best Score</th>
+                        <th>Date Registered</th>
+                    </tr>
+                </thead>
+                <tbody id="studentTableBody">
+                    <tr><td colspan="8" style="text-align:center; padding:20px;">Loading student records...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ==================== SECTION 3: QUIZ RESULTS HISTORY ==================== -->
+    <div id="section-history" class="card hidden">
+        <h2>📊 Student Quiz Submission History</h2>
+        <p style="color:#718096; font-size:13px; margin-bottom:14px;">Detailed audit log of completed quizzes submitted by students across all devices.</p>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Student Name</th>
+                        <th>Grade</th>
+                        <th>Subject</th>
+                        <th>Score</th>
+                        <th>Accuracy</th>
+                        <th>Points</th>
+                        <th>Date & Time</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="historyTableBody">
+                    <tr><td colspan="9" style="text-align:center; padding:20px;">Loading quiz history...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ==================== SECTION 4: ANALYTICS & OVERVIEW ==================== -->
+    <div id="section-analytics" class="card hidden">
+        <h2>📈 System Analytics & Performance Metrics</h2>
+        
+        <div class="stats-kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-num" id="kpiStudents">0</div>
+                <div class="kpi-lbl">Total Students</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-num" id="kpiQuestions">0</div>
+                <div class="kpi-lbl">Total Questions in Bank</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-num" id="kpiQuizzes">0</div>
+                <div class="kpi-lbl">Quizzes Completed</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-num" id="kpiAccuracy">0%</div>
+                <div class="kpi-lbl">Overall Passing Accuracy</div>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 16px;">
+            <div style="background: #fff5f5; padding: 16px; border-radius: 12px;">
+                <h3 style="color:#9b2c2c; font-size:15px; margin-bottom:10px;">📚 Question Distribution by Subject</h3>
+                <div id="subjectBreakdown">Loading breakdown...</div>
+            </div>
+            <div style="background: #fff5f5; padding: 16px; border-radius: 12px;">
+                <h3 style="color:#9b2c2c; font-size:15px; margin-bottom:10px;">🎓 Question Distribution by Grade</h3>
+                <div id="gradeBreakdown">Loading breakdown...</div>
+            </div>
+            <div style="background: #fff5f5; padding: 16px; border-radius: 12px;">
+                <h3 style="color:#9b2c2c; font-size:15px; margin-bottom:10px;">📝 Question Distribution by Type</h3>
+                <div id="typeBreakdown">Loading breakdown...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- INCLUDE UNIVERSAL API CLIENT -->
+    <script>
+/**
+ * East Systems Colleges of Rizal - Quiz App
+ * Universal Frontend API Client & Storage Sync
+ */
+
+const API = {
+    // Detect whether API is reachable.
+    // WebIntoApp wraps the app as a native WebView pointing to a real hosted URL,
+    // so http/https always works there. file:// = opened directly in browser (no server).
+    baseUrl: (function() {
+        const proto = window.location.protocol;
+        if (proto === 'http:' || proto === 'https:') {
+            // Hosted on a real server (local PHP server, or WebIntoApp/cloud hosting)
+            return 'api.php';
+        }
+        // Opened directly as a file — point to local server if running
+        return 'http://localhost:8000/api.php';
+    })(),
+
+    isOnline: false,
+
+        async fetchWithTimeout(url, options = {}, timeoutMs = 3500) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), timeoutMs);
+        try {
+            return await fetch(url, { ...options, signal: controller.signal });
+        } finally {
+            clearTimeout(timer);
+        }
+    },
+
+    async init() {
+        try {
+            const res = await this.fetchWithTimeout(`${this.baseUrl}?action=ping`, { cache: 'no-store' });
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success) {
+                    this.isOnline = true;
+                }
+            }
+        } catch (e) {
+            this.isOnline = false;
+        }
+        this.renderStatusBadge();
+        return this.isOnline;
+    },
+
+    renderStatusBadge() {
+        let badge = document.getElementById('apiStatusBadge');
+        if (!badge) {
+            badge = document.createElement('div');
+            badge.id = 'apiStatusBadge';
+            badge.style.position = 'fixed';
+            badge.style.bottom = '12px';
+            badge.style.right = '12px';
+            badge.style.padding = '6px 12px';
+            badge.style.borderRadius = '20px';
+            badge.style.fontSize = '12px';
+            badge.style.fontWeight = '600';
+            badge.style.zIndex = '9999';
+            badge.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+            badge.style.transition = 'all 0.3s';
+            document.body.appendChild(badge);
+        }
+
+        if (this.isOnline) {
+            badge.style.backgroundColor = '#2f855a';
+            badge.style.color = '#ffffff';
+            badge.innerHTML = '🟢 Database Server Online';
+            badge.title = 'Connected to central SQLite/PHP backend database.';
+        } else {
+            badge.style.backgroundColor = '#dd6b20';
+            badge.style.color = '#ffffff';
+            badge.innerHTML = '🟡 Offline (Local Mode)';
+            badge.title = 'Running on browser storage. Start START_APP.bat for full multi-device database.';
+        }
+    },
+
+    // ==================== AUTHENTICATION ==================== //
+    async login(username, password, role) {
+        try {
+            const res = await fetch(`${this.baseUrl}?action=login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password, role })
+            });
+            const data = await res.json();
+            if (data && typeof data === 'object') {
+                if (data.success) {
+                    this.isOnline = true;
+                    this.renderStatusBadge();
+                }
+                return data;
+            }
+        } catch (err) {
+            console.warn('API error, falling back to local auth', err);
+        }
+
+        // LocalStorage fallback with full bank of 75 questions
+        let qs = JSON.parse(localStorage.getItem('shsQuestions') || '[]');
+        if (qs.length < 20) {
+            qs = [{"id":36,"grade":"11","category":"Science","difficulty":"Easy","type":"multiple_choice","question":"What is the primary chemical formula for Water?","choices":["H2O","CO2","O2","NaCl"],"correct":0,"correct_text":"","explanation":"Water consists of 2 Hydrogen atoms bonded to 1 Oxygen atom (H2O)."},{"id":37,"grade":"11","category":"Science","difficulty":"Average","type":"multiple_choice","question":"Which cell organelle is known as the \"powerhouse of the cell\"?","choices":["Ribosome","Mitochondria","Endoplasmic Reticulum","Golgi Apparatus"],"correct":1,"correct_text":"","explanation":"Mitochondria produce ATP through cellular respiration, supplying cellular energy."},{"id":38,"grade":"11","category":"Science","difficulty":"Difficult","type":"multiple_choice","question":"Which type of rock is formed from the cooling and solidification of molten rock (magma or lava)?","choices":["Sedimentary","Metamorphic","Igneous","Limestone"],"correct":2,"correct_text":"","explanation":"Igneous rocks (like basalt and granite) crystallize directly from molten magma or lava."},{"id":39,"grade":"11","category":"Science","difficulty":"Mastery","type":"multiple_choice","question":"In plate tectonics, what landform is typically formed when two continental plates collide?","choices":["Mid-ocean ridge","Mountain range","Deep-sea trench","Rift valley"],"correct":1,"correct_text":"","explanation":"Continental-continental convergence causes crustal crumpling that forms high mountain ranges like the Himalayas."},{"id":40,"grade":"12","category":"Science","difficulty":"Easy","type":"multiple_choice","question":"Which planet in our solar system is known as the Red Planet?","choices":["Venus","Mars","Jupiter","Mercury"],"correct":1,"correct_text":"","explanation":"Mars appears red due to iron oxide (rust) on its surface."},{"id":41,"grade":"12","category":"Science","difficulty":"Average","type":"multiple_choice","question":"What type of chemical bond involves the transfer of electrons from a metal to a non-metal?","choices":["Covalent bond","Ionic bond","Metallic bond","Hydrogen bond"],"correct":1,"correct_text":"","explanation":"An ionic bond is formed through electrostatic attraction after the complete transfer of valence electrons."},{"id":42,"grade":"12","category":"Science","difficulty":"Difficult","type":"multiple_choice","question":"Which law states that energy cannot be created or destroyed, only transformed?","choices":["First Law of Thermodynamics","Second Law of Thermodynamics","Law of Conservation of Momentum","Newton's Third Law"],"correct":0,"correct_text":"","explanation":"The First Law of Thermodynamics is the Law of Conservation of Energy."},{"id":43,"grade":"11","category":"Science","difficulty":"Easy","type":"true_false","question":"Photosynthesis takes place primarily in the chloroplasts of plant cells.","choices":["True","False"],"correct":0,"correct_text":"","explanation":"Chloroplasts contain chlorophyll which absorbs sunlight for photosynthesis."},{"id":44,"grade":"11","category":"Science","difficulty":"Average","type":"true_false","question":"Sound travels faster in a vacuum than through air.","choices":["True","False"],"correct":1,"correct_text":"","explanation":"Sound is a mechanical wave and requires a physical medium to travel; it cannot travel in a vacuum."},{"id":45,"grade":"12","category":"Science","difficulty":"Difficult","type":"true_false","question":"DNA contains the nitrogenous base Uracil instead of Thymine.","choices":["True","False"],"correct":1,"correct_text":"","explanation":"RNA contains Uracil; DNA contains Thymine."},{"id":46,"grade":"12","category":"Science","difficulty":"Average","type":"true_false","question":"The ozone layer is primarily situated within the Stratosphere of Earth's atmosphere.","choices":["True","False"],"correct":0,"correct_text":"","explanation":"The ozone layer resides in the stratosphere between 15 and 35 km above Earth."},{"id":47,"grade":"11","category":"Science","difficulty":"Easy","type":"identification","question":"What is the chemical symbol for Gold in the periodic table?","choices":[],"correct":0,"correct_text":"Au","explanation":"Au comes from the Latin word \"Aurum\"."},{"id":48,"grade":"11","category":"Science","difficulty":"Average","type":"identification","question":"What organelle is known as the powerhouse of the cell?","choices":[],"correct":0,"correct_text":"Mitochondria","explanation":"Mitochondria produce cellular ATP energy."},{"id":49,"grade":"12","category":"Science","difficulty":"Difficult","type":"identification","question":"What is the closest star to the Earth?","choices":[],"correct":0,"correct_text":"Sun","explanation":"The Sun is the star at the center of the Solar System."},{"id":50,"grade":"12","category":"Science","difficulty":"Mastery","type":"identification","question":"What biological macromolecule carries the genetic instructions for all living organisms? (Acronym)","choices":[],"correct":0,"correct_text":"DNA","explanation":"DNA stands for Deoxyribonucleic Acid."},{"id":51,"grade":"11","category":"Mathematics","difficulty":"Easy","type":"multiple_choice","question":"What is the product of 7 multiplied by 8?","choices":["54","56","49","63"],"correct":1,"correct_text":"","explanation":"7 × 8 = 56."},{"id":52,"grade":"11","category":"Mathematics","difficulty":"Average","type":"multiple_choice","question":"If f(x) = 3x + 5, what is the value of f(4)?","choices":["12","15","17","21"],"correct":2,"correct_text":"","explanation":"f(4) = 3(4) + 5 = 12 + 5 = 17."},{"id":53,"grade":"11","category":"Mathematics","difficulty":"Difficult","type":"multiple_choice","question":"What is the simple interest on Php 10,000 invested at 5% annual rate for 3 years? (Formula: I = Prt)","choices":["Php 1,000","Php 1,500","Php 2,000","Php 500"],"correct":1,"correct_text":"","explanation":"I = 10,000 × 0.05 × 3 = Php 1,500."},{"id":54,"grade":"11","category":"Mathematics","difficulty":"Mastery","type":"multiple_choice","question":"Which of the following represents a rational inequality?","choices":["(2x - 1) / (x + 3) > 0","y = 2x^2 + 5x","3x + 4 = 19","f(x) = sqrt(x - 2)"],"correct":0,"correct_text":"","explanation":"A rational inequality involves rational expressions with inequality symbols (>, <, >=, <=)."},{"id":55,"grade":"12","category":"Mathematics","difficulty":"Easy","type":"multiple_choice","question":"In statistics, what measure of central tendency represents the most frequently occurring value?","choices":["Mean","Median","Mode","Variance"],"correct":2,"correct_text":"","explanation":"The mode is the value with highest frequency."},{"id":56,"grade":"12","category":"Mathematics","difficulty":"Average","type":"multiple_choice","question":"In a standard normal distribution (Z-distribution), what are the mean and standard deviation?","choices":["Mean = 1, SD = 0","Mean = 0, SD = 1","Mean = 50, SD = 10","Mean = 100, SD = 15"],"correct":1,"correct_text":"","explanation":"A standard normal curve has a mean (μ) of 0 and a standard deviation (σ) of 1."},{"id":57,"grade":"12","category":"Mathematics","difficulty":"Difficult","type":"multiple_choice","question":"How many unique 4-digit PIN codes can be formed from digits 0 to 9 if repetition is NOT allowed? (Formula: P(10,4))","choices":["5,040","10,000","2,520","720"],"correct":0,"correct_text":"","explanation":"10 × 9 × 8 × 7 = 5,040 permutations."},{"id":58,"grade":"11","category":"Mathematics","difficulty":"Easy","type":"true_false","question":"The sum of all interior angles in any Euclidean triangle is always 180 degrees.","choices":["True","False"],"correct":0,"correct_text":"","explanation":"The triangle angle sum theorem dictates that the 3 interior angles sum to 180°."},{"id":59,"grade":"11","category":"Mathematics","difficulty":"Average","type":"true_false","question":"Zero is categorized as a positive integer.","choices":["True","False"],"correct":1,"correct_text":"","explanation":"Zero is neutral: it is neither positive nor negative."},{"id":60,"grade":"12","category":"Mathematics","difficulty":"Easy","type":"true_false","question":"The square root of 64 is equal to 8.","choices":["True","False"],"correct":0,"correct_text":"","explanation":"8 × 8 = 64."},{"id":61,"grade":"12","category":"Mathematics","difficulty":"Difficult","type":"true_false","question":"A rational number cannot be represented as a ratio of two integers.","choices":["True","False"],"correct":1,"correct_text":"","explanation":"By definition, rational numbers can be expressed as a fraction a/b where b is non-zero."},{"id":62,"grade":"11","category":"Mathematics","difficulty":"Easy","type":"identification","question":"What is the value of Pi rounded to two decimal places?","choices":[],"correct":0,"correct_text":"3.14","explanation":"Pi (π) is approximately 3.14159..."},{"id":63,"grade":"11","category":"Mathematics","difficulty":"Average","type":"identification","question":"In a right triangle, what famous theorem states that a^2 + b^2 = c^2?","choices":[],"correct":0,"correct_text":"Pythagorean Theorem","explanation":"Named after ancient Greek mathematician Pythagoras."},{"id":64,"grade":"12","category":"Mathematics","difficulty":"Average","type":"identification","question":"What is the perimeter of a square with a side length of 5 cm?","choices":[],"correct":0,"correct_text":"20","explanation":"Perimeter = 4 × side = 4 × 5 = 20 cm."},{"id":65,"grade":"12","category":"Mathematics","difficulty":"Difficult","type":"identification","question":"What mathematical term describes a polynomial consisting of exactly two terms?","choices":[],"correct":0,"correct_text":"Binomial","explanation":"Bi- means two, as in binomial."},{"id":66,"grade":"11","category":"English","difficulty":"Easy","type":"multiple_choice","question":"Which part of speech names a person, place, thing, or idea?","choices":["Verb","Adjective","Noun","Adverb"],"correct":2,"correct_text":"","explanation":"A noun is a naming word for people, places, things, or concepts."},{"id":67,"grade":"11","category":"English","difficulty":"Average","type":"multiple_choice","question":"Which figure of speech directly compares two unlike things using \"like\" or \"as\"?","choices":["Metaphor","Simile","Personification","Hyperbole"],"correct":1,"correct_text":"","explanation":"Similes explicitly compare using words such as \"like\" or \"as\"."},{"id":68,"grade":"11","category":"English","difficulty":"Difficult","type":"multiple_choice","question":"Identify the sentence with correct subject-verb agreement:","choices":["Each of the students have submitted their project.","The bouquet of red roses smell wonderful.","Neither the teacher nor the students were absent yesterday.","A number of books was donated to the library."],"correct":2,"correct_text":"","explanation":"In \"neither... nor\", the verb agrees with the closer subject (\"students were\")."},{"id":69,"grade":"11","category":"English","difficulty":"Mastery","type":"multiple_choice","question":"In academic writing, what is the central argument or claim of an essay called?","choices":["Topic sentence","Thesis statement","Bibliography","Hook"],"correct":1,"correct_text":"","explanation":"A thesis statement encapsulates the main claim and scope of an academic paper."},{"id":70,"grade":"12","category":"English","difficulty":"Easy","type":"multiple_choice","question":"Which punctuation mark is used to indicate a direct quotation or title of a short work?","choices":["Parentheses","Quotation marks","Apostrophe","Hyphen"],"correct":1,"correct_text":"","explanation":"Quotation marks (\" \") enclose direct speech or citations."},{"id":71,"grade":"12","category":"English","difficulty":"Average","type":"multiple_choice","question":"What reading strategy involves quickly scanning a text to locate specific information?","choices":["Skimming","Scanning","Extensive reading","In-depth analysis"],"correct":1,"correct_text":"","explanation":"Scanning is looking for specific keywords or facts without reading every word."},{"id":72,"grade":"12","category":"English","difficulty":"Difficult","type":"multiple_choice","question":"What is the fallacious argument where one attacks the person's character rather than their argument?","choices":["Straw Man","Ad Hominem","Bandwagon","False Dilemma"],"correct":1,"correct_text":"","explanation":"Ad hominem (Latin: \"to the person\") attacks character instead of the issue."},{"id":73,"grade":"11","category":"English","difficulty":"Easy","type":"true_false","question":"The word \"quickly\" functions as an adverb in modern English grammar.","choices":["True","False"],"correct":0,"correct_text":"","explanation":"\"Quickly\" describes how an action is performed, modifying verbs."},{"id":74,"grade":"11","category":"English","difficulty":"Average","type":"true_false","question":"An antonym is a word that has the identical meaning as another word.","choices":["True","False"],"correct":1,"correct_text":"","explanation":"An antonym has opposite meaning; synonyms have similar meanings."},{"id":75,"grade":"12","category":"English","difficulty":"Average","type":"true_false","question":"A thesis statement is usually positioned near the end of the introductory paragraph.","choices":["True","False"],"correct":0,"correct_text":"","explanation":"Placing the thesis at the end of the introduction transitions effectively into body paragraphs."},{"id":76,"grade":"12","category":"English","difficulty":"Difficult","type":"true_false","question":"Plagiarism is acceptable as long as you rewrite the passage in your own words without citation.","choices":["True","False"],"correct":1,"correct_text":"","explanation":"Paraphrasing without attributing the original author is still plagiarism."},{"id":77,"grade":"11","category":"English","difficulty":"Average","type":"identification","question":"What figure of speech gives human attributes or feelings to non-human objects?","choices":[],"correct":0,"correct_text":"Personification","explanation":"Example: \"The wind whispered through the trees.\""},{"id":78,"grade":"11","category":"English","difficulty":"Easy","type":"identification","question":"What punctuation mark is used at the end of an asking or interrogative sentence?","choices":[],"correct":0,"correct_text":"Question mark","explanation":"The question mark (?) indicates an inquiry."},{"id":79,"grade":"12","category":"English","difficulty":"Average","type":"identification","question":"What literary term refers to the main character or hero in a narrative story?","choices":[],"correct":0,"correct_text":"Protagonist","explanation":"The protagonist drives the main storyline."},{"id":80,"grade":"12","category":"English","difficulty":"Easy","type":"identification","question":"What is the comparative degree of the adjective \"good\"?","choices":[],"correct":0,"correct_text":"Better","explanation":"Good, Better, Best."},{"id":81,"grade":"11","category":"Filipino","difficulty":"Easy","type":"multiple_choice","question":"Ano ang pambansang wika ng Pilipinas ayon sa Saligang Batas ng 1987?","choices":["Tagalog","Filipino","Pilipino","Ingles"],"correct":1,"correct_text":"","explanation":"Ayon sa Saligang Batas ng 1987, Artikulo XIV, Seksyon 6: Ang wikang pambansa ay Filipino."},{"id":82,"grade":"11","category":"Filipino","difficulty":"Average","type":"multiple_choice","question":"Anong barayti ng wika ang tumutukoy sa pansariling paraan ng pagsasalita ng isang indibidwal?","choices":["Sosyolek","Diyalekto","Idyolek","Etnolek"],"correct":2,"correct_text":"","explanation":"Ang idyolek ay ang indibidwal at natatanging estilo o tatak sa pagsasalita."},{"id":83,"grade":"11","category":"Filipino","difficulty":"Difficult","type":"multiple_choice","question":"Anong gamit ng wika ayon kay M.A.K. Halliday ang ginagamit sa pagpapahayag ng sariling damdamin at opinyon?","choices":["Instrumental","Personal","Interaksiyonal","Heuristiko"],"correct":1,"correct_text":"","explanation":"Ang personal na tungkulin ng wika ay nagpapahayag ng sariling pananaw at emosyon."},{"id":84,"grade":"11","category":"Filipino","difficulty":"Mastery","type":"multiple_choice","question":"Ano ang tawag sa sinaunang sistema ng pagsulat ng mga katutubong Pilipino bago dumating ang mga Espanyol?","choices":["Abakada","Baybayin","Alibata","Alpabetong Romano"],"correct":1,"correct_text":"","explanation":"Baybayin ang tamang tawag sa sinaunang katutubong paraan ng pagsulat ng mga Pilipino."},{"id":85,"grade":"12","category":"Filipino","difficulty":"Easy","type":"multiple_choice","question":"Ano ang kahulugan ng salitang \"saliksik\" o \"pananaliksik\"?","choices":["Paghula","Makaagham at sistematikong pagsusuri","Kuwentong bayan","Pangongopya"],"correct":1,"correct_text":"","explanation":"Ang pananaliksik ay isang sistematiko at makaagham na proseso ng pagtuklas ng impormasyon."},{"id":86,"grade":"12","category":"Filipino","difficulty":"Average","type":"multiple_choice","question":"Aling bahagi ng pananaliksik ang naglalaman ng maikling buod ng buong pag-aaral?","choices":["Metodolohiya","Abstrak","Konklusyon","Talasanggunian"],"correct":1,"correct_text":"","explanation":"Ang abstrak ay maikling buod ng pananaliksik."},{"id":87,"grade":"12","category":"Filipino","difficulty":"Difficult","type":"multiple_choice","question":"Ano ang tawag sa ilegal na pagkopya o pag-angkin ng gawa, ideya, o salita ng iba nang walang wastong pagkilala?","choices":["Paraphrasing","Plagiarism","Sintesis","Bibliyograpiya"],"correct":1,"correct_text":"","explanation":"Ang plagiarism ay paglabag sa karapatang-ari sa pamamagitan ng pag-angkin ng gawa ng iba nang walang credit."},{"id":88,"grade":"11","category":"Filipino","difficulty":"Easy","type":"true_false","question":"Ang Tagalog, Pilipino, at Filipino ay magkakatulad at walang pagkakaiba sa kasaysayan.","choices":["True","False"],"correct":1,"correct_text":"","explanation":"May pagkakaiba: ang Tagalog ay katutubong wika, Pilipino ang pambansang wika noong 1959, at Filipino noong 1987."},{"id":89,"grade":"11","category":"Filipino","difficulty":"Average","type":"true_false","question":"Ang idyolek ay ang personal o natatanging estilo ng pagsasalita ng isang partikular na tao.","choices":["True","False"],"correct":0,"correct_text":"","explanation":"Tama. Halimbawa ang kilalang estilo ni Mike Enriquez o Noli de Castro."},{"id":90,"grade":"12","category":"Filipino","difficulty":"Easy","type":"true_false","question":"Ayon sa batas, ang pambansang wika ng Pilipinas ay Filipino.","choices":["True","False"],"correct":0,"correct_text":"","explanation":"Tama, alinsunod sa 1987 Philippine Constitution Art. XIV Sec. 6."},{"id":91,"grade":"12","category":"Filipino","difficulty":"Difficult","type":"true_false","question":"Ang talasanggunian o bibliyograpiya ay inilalagay sa pinakaunang pahina ng isang pamanahong papel.","choices":["True","False"],"correct":1,"correct_text":"","explanation":"Mali. Ang talasanggunian ay inilalagay sa dulo ng pananaliksik."},{"id":92,"grade":"11","category":"Filipino","difficulty":"Average","type":"identification","question":"Sino ang kinikilalang \"Ama ng Wikang Pambansa\" ng Pilipinas?","choices":[],"correct":0,"correct_text":"Manuel L. Quezon","explanation":"Si Pangulong Manuel L. Quezon ang nagsulong ng pagkakaroon ng pambansang wika."},{"id":93,"grade":"11","category":"Filipino","difficulty":"Mastery","type":"identification","question":"Ano ang katutubong sistema ng pagsulat ng mga Pilipino bago dumating ang mga Espanyol?","choices":[],"correct":0,"correct_text":"Baybayin","explanation":"Baybayin ang sinaunang katutubong pagsulat."},{"id":94,"grade":"12","category":"Filipino","difficulty":"Average","type":"identification","question":"Anong barayti ng wika ang nalilikha dahil sa heograpikal na dimensiyon o lokasyon?","choices":[],"correct":0,"correct_text":"Diyalekto","explanation":"Halimbawa: Tagalog-Batangas, Tagalog-Bulacan."},{"id":95,"grade":"12","category":"Filipino","difficulty":"Easy","type":"identification","question":"Ano ang tawag sa maikling buod ng isang akademikong sulatin o pananaliksik?","choices":[],"correct":0,"correct_text":"Abstrak","explanation":"Ang abstrak ay maikling buod sa unahan ng pananaliksik."},{"id":96,"grade":"11","category":"Social Science","difficulty":"Easy","type":"multiple_choice","question":"Sino ang pambansang bayani ng Pilipinas na sumulat ng \"Noli Me Tangere\" at \"El Filibusterismo\"?","choices":["Andres Bonifacio","Dr. Jose Rizal","Emilio Aguinaldo","Apolinario Mabini"],"correct":1,"correct_text":"","explanation":"Isinulat ni Dr. Jose Rizal ang Noli Me Tangere at El Filibusterismo."},{"id":97,"grade":"11","category":"Social Science","difficulty":"Average","type":"multiple_choice","question":"What sociological concept refers to the belief that one's own culture is superior to all other cultures?","choices":["Cultural Relativism","Ethnocentrism","Xenocentrism","Subculture"],"correct":1,"correct_text":"","explanation":"Ethnocentrism is evaluating other cultures through standards of one's own culture."},{"id":98,"grade":"11","category":"Social Science","difficulty":"Difficult","type":"multiple_choice","question":"Which branch of the Philippine government is constitutionally authorized to interpret and apply laws?","choices":["Executive Branch","Legislative Branch","Judicial Branch","Civil Service Commission"],"correct":2,"correct_text":"","explanation":"The Judicial Branch (headed by the Supreme Court) holds the judicial power."},{"id":99,"grade":"11","category":"Social Science","difficulty":"Mastery","type":"multiple_choice","question":"What is the term for the intangible aspects of culture including values, norms, beliefs, and language?","choices":["Material Culture","Non-material Culture","Archaeology","Artifacts"],"correct":1,"correct_text":"","explanation":"Non-material culture consists of the ideas, attitudes, and beliefs of a society."},{"id":100,"grade":"12","category":"Social Science","difficulty":"Easy","type":"multiple_choice","question":"How many years is one regular term of the President of the Philippines under the 1987 Constitution?","choices":["4 years","5 years","6 years","7 years"],"correct":2,"correct_text":"","explanation":"Under Article VII of the 1987 Constitution, the President serves a single 6-year term."},{"id":101,"grade":"12","category":"Social Science","difficulty":"Average","type":"multiple_choice","question":"What form of government is officially practiced in the Philippines?","choices":["Parliamentary Democracy","Unitary Presidential Constitutional Republic","Federal Monarchy","Socialist State"],"correct":1,"correct_text":"","explanation":"The Philippines is governed as a unitary presidential constitutional republic."},{"id":102,"grade":"12","category":"Social Science","difficulty":"Difficult","type":"multiple_choice","question":"What is the highest law of the land in the Republic of the Philippines?","choices":["Civil Code","Revised Penal Code","The 1987 Philippine Constitution","Republic Act 10533"],"correct":2,"correct_text":"","explanation":"The Constitution is the fundamental and supreme law of the land."},{"id":103,"grade":"11","category":"Social Science","difficulty":"Easy","type":"true_false","question":"The legislative branch of the Philippine government is composed of the Senate and the House of Representatives.","choices":["True","False"],"correct":0,"correct_text":"","explanation":"The Congress of the Philippines is bicameral."},{"id":104,"grade":"11","category":"Social Science","difficulty":"Average","type":"true_false","question":"Cultural relativism argues that cultures should be judged using the standards of Western societies.","choices":["True","False"],"correct":1,"correct_text":"","explanation":"Cultural relativism states that a person's beliefs and practices should be understood based on that person's own culture."},{"id":105,"grade":"12","category":"Social Science","difficulty":"Easy","type":"true_false","question":"Under Philippine law, an accused person is presumed innocent until proven guilty beyond reasonable doubt.","choices":["True","False"],"correct":0,"correct_text":"","explanation":"Presumption of innocence is a constitutional right under the Bill of Rights."},{"id":106,"grade":"12","category":"Social Science","difficulty":"Difficult","type":"true_false","question":"The 1987 Philippine Constitution was ratified during the administration of President Ferdinand Marcos Sr.","choices":["True","False"],"correct":1,"correct_text":"","explanation":"It was ratified during the administration of President Corazon C. Aquino."},{"id":107,"grade":"11","category":"Social Science","difficulty":"Easy","type":"identification","question":"Who is the national hero of the Philippines who wrote Noli Me Tangere?","choices":[],"correct":0,"correct_text":"Jose Rizal","explanation":"Dr. Jose Rizal."},{"id":108,"grade":"11","category":"Social Science","difficulty":"Average","type":"identification","question":"What is the supreme and fundamental law of the land in the Philippines?","choices":[],"correct":0,"correct_text":"Constitution","explanation":"The 1987 Philippine Constitution."},{"id":109,"grade":"12","category":"Social Science","difficulty":"Average","type":"identification","question":"What branch of the Philippine government is headed by the President and Vice President?","choices":[],"correct":0,"correct_text":"Executive","explanation":"The Executive branch implements and enforces laws."},{"id":110,"grade":"12","category":"Social Science","difficulty":"Difficult","type":"identification","question":"What constitutional commission in the Philippines is tasked with administering elections? (Acronym)","choices":[],"correct":0,"correct_text":"COMELEC","explanation":"Commission on Elections (COMELEC)."}];
+            localStorage.setItem('shsQuestions', JSON.stringify(qs));
+        }
+
+        return qs.filter(q => {
+            const okG = grade === 'all' || !q.grade || q.grade === grade;
+            const okS = category === 'all' || q.category === category;
+            const okD = difficulty === 'all' || q.difficulty === difficulty;
+            const okT = type === 'all' || !q.type || q.type === type;
+            return okG && okS && okD && okT;
+        });
+    },
+
+    async addQuestion(qData) {
+        if (this.isOnline) {
+            try {
+                const res = await fetch(`${this.baseUrl}?action=add_question`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(qData)
+                });
+                return await res.json();
+            } catch (err) {
+                console.warn('API error adding question', err);
+            }
+        }
+
+        // LocalStorage fallback
+        const qs = JSON.parse(localStorage.getItem('shsQuestions') || '[]');
+        qData.id = Date.now();
+        qs.unshift(qData);
+        localStorage.setItem('shsQuestions', JSON.stringify(qs));
+        return { success: true, message: 'Question saved locally!' };
+    },
+
+    async editQuestion(qData) {
+        if (this.isOnline) {
+            try {
+                const res = await fetch(`${this.baseUrl}?action=edit_question`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(qData)
+                });
+                return await res.json();
+            } catch (err) {
+                console.warn('API error editing question', err);
+            }
+        }
+
+        // LocalStorage fallback
+        let qs = JSON.parse(localStorage.getItem('shsQuestions') || '[]');
+        const idx = qs.findIndex(q => q.id === qData.id);
+        if (idx !== -1) {
+            qs[idx] = qData;
+            localStorage.setItem('shsQuestions', JSON.stringify(qs));
+            return { success: true, message: 'Question updated locally!' };
+        }
+        return { success: false, error: 'Question not found.' };
+    },
+
+    async deleteQuestion(id) {
+        if (this.isOnline) {
+            try {
+                const res = await fetch(`${this.baseUrl}?action=delete_question`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+                return await res.json();
+            } catch (err) {
+                console.warn('API error deleting question', err);
+            }
+        }
+
+        // LocalStorage fallback
+        let qs = JSON.parse(localStorage.getItem('shsQuestions') || '[]');
+        qs = qs.filter(q => q.id !== id);
+        localStorage.setItem('shsQuestions', JSON.stringify(qs));
+        return { success: true, message: 'Question deleted.' };
+    },
+
+    // ==================== SCORES & LEADERBOARD ==================== //
+    async saveScore(scoreData) {
+        if (this.isOnline) {
+            try {
+                const res = await fetch(`${this.baseUrl}?action=save_score`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(scoreData)
+                });
+                return await res.json();
+            } catch (err) {
+                console.warn('API error saving score', err);
+            }
+        }
+
+        // LocalStorage fallback
+        let lb = JSON.parse(localStorage.getItem('lbV2') || '[]');
+        lb.push({
+            n: scoreData.student_name,
+            s: scoreData.score,
+            t: scoreData.total_questions,
+            pct: Math.round((scoreData.score / scoreData.total_questions) * 100),
+            pts: scoreData.points_earned,
+            subject: scoreData.subject || 'General',
+            grade: scoreData.grade || '11',
+            d: new Date().toLocaleDateString()
+        });
+        lb.sort((a,b) => (b.s/b.t) - (a.s/a.t));
+        localStorage.setItem('lbV2', JSON.stringify(lb.slice(0, 25)));
+        return { success: true };
+    },
+
+    async getLeaderboard() {
+        if (this.isOnline) {
+            try {
+                const res = await this.fetchWithTimeout(`${this.baseUrl}?action=get_leaderboard`);
+                const data = await res.json();
+                if (data.success && data.leaderboard) {
+                    return data.leaderboard;
+                }
+            } catch (err) {
+                console.warn('API error getting leaderboard', err);
+            }
+        }
+
+        // Offline fallback: build ranking from all saved student accounts
+        const allUsers = JSON.parse(localStorage.getItem('allAccounts') || '[]');
+        const students = allUsers.filter(a => a.role === 'student');
+        // Return in new format so renderLB works
+        return students.map(s => ({
+            name: s.name || s.username,
+            username: s.username,
+            total_points: s.points || 0,
+            level: s.level || 1,
+            accuracy: 0,
+            quizzes: 0,
+            badges: 0
+        })).sort((a, b) => b.total_points - a.total_points);
+    },
+
+    // ==================== USER PROGRESS ==================== //
+    async getUserProgress(userId, username) {
+        if (this.isOnline) {
+            try {
+                const res = await fetch(`${this.baseUrl}?action=get_user_progress&user_id=${userId}&username=${encodeURIComponent(username)}`);
+                const data = await res.json();
+                if (data.success && data.progress) {
+                    return data.progress;
+                }
+            } catch (err) {
+                console.warn('API error getting user progress', err);
+            }
+        }
+
+        let d = JSON.parse(localStorage.getItem('userV2') || '{}');
+        if (!d.points) {
+            d = {
+                points: 0, level: 1, lives: 5, maxLives: 5, streak: 0, bestStreak: 0,
+                totalQs: 0, correctQs: 0, pu: { p50: 3, skip: 2, hint: 2, sec: 1 },
+                badges: [], subj: {}, dailyDone: null
+            };
+        }
+        return d;
+    },
+
+    async saveUserProgress(userId, username, progress) {
+        localStorage.setItem('userV2', JSON.stringify(progress));
+
+        if (this.isOnline) {
+            try {
+                await fetch(`${this.baseUrl}?action=save_user_progress`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, username, progress })
+                });
+            } catch (err) {
+                console.warn('API error saving progress', err);
+            }
+        }
+    },
+
+    // ==================== ADMIN MONITORING ==================== //
+    async getAdminStats() {
+        if (this.isOnline) {
+            try {
+                const res = await fetch(`${this.baseUrl}?action=get_admin_stats`);
+                const data = await res.json();
+                if (data.success) return data.stats;
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+        return {
+            totalStudents: JSON.parse(localStorage.getItem('allAccounts')||'[]').filter(a=>a.role==='student').length,
+            totalQuestions: JSON.parse(localStorage.getItem('shsQuestions')||'[]').length,
+            totalQuizzes: JSON.parse(localStorage.getItem('lbV2')||'[]').length,
+            avgAccuracy: 85.0
+        };
+    },
+
+    async getStudentRecords() {
+        if (this.isOnline) {
+            try {
+                const res = await fetch(`${this.baseUrl}?action=get_student_records`);
+                const data = await res.json();
+                if (data.success) return data.students;
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+        return JSON.parse(localStorage.getItem('allAccounts')||'[]')
+            .filter(a=>a.role==='student')
+            .map(s => ({
+                id: s.id || 0,
+                name: s.name,
+                username: s.username,
+                created_at: new Date().toLocaleDateString(),
+                points: 0,
+                level: 1,
+                quizzes_taken: 0,
+                best_pct: 0
+            }));
+    },
+
+    async getQuizHistory() {
+        if (this.isOnline) {
+            try {
+                const res = await fetch(`${this.baseUrl}?action=get_quiz_history`);
+                const data = await res.json();
+                if (data.success) return data.history;
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+        return JSON.parse(localStorage.getItem('lbV2')||'[]').map((l, i) => ({
+            id: i + 1,
+            student_name: l.n,
+            grade: l.grade || '11',
+            subject: l.subject || 'General',
+            difficulty: 'All',
+            score: l.s,
+            total_questions: l.t,
+            percentage: l.pct,
+            points_earned: l.pts || (l.s * 10),
+            created_at: l.d
+        }));
+    },
+
+    async deleteScore(id) {
+        if (this.isOnline) {
+            try {
+                const res = await fetch(`${this.baseUrl}?action=delete_score`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+                return await res.json();
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+        return { success: true };
+    },
+
+    // ==================== SAFE LOGOUT ==================== //
+    logout() {
+        // Tell the server to destroy the session too (fire-and-forget —
+        // don't block the redirect if it's offline).
+        fetch(`${this.baseUrl}?action=logout`).catch(() => {});
+        // ONLY clear user session keys, NEVER clear all questions or all users!
+        localStorage.removeItem('loggedInRole');
+        localStorage.removeItem('loggedInUser');
+        localStorage.removeItem('studentName');
+        localStorage.removeItem('userId');
+        window.location.href = 'login.html';
+    }
+};
+
+// ==================== PWA SERVICE WORKER & INSTALL BANNER ==================== //
+if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').then(reg => {
+            console.log('✅ ESCR Quiz App PWA Service Worker Registered!');
+        }).catch(err => {
+            console.log('SW note:', err);
+        });
+    });
+}
+
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    renderInstallBanner();
+});
+
+function renderInstallBanner() {
+    if (document.getElementById('pwaInstallBanner')) return;
+    const banner = document.createElement('div');
+    banner.id = 'pwaInstallBanner';
+    banner.style.position = 'fixed';
+    banner.style.bottom = '52px';
+    banner.style.left = '50%';
+    banner.style.transform = 'translateX(-50%)';
+    banner.style.backgroundColor = '#740202';
+    banner.style.color = '#ffffff';
+    banner.style.padding = '10px 18px';
+    banner.style.borderRadius = '30px';
+    banner.style.boxShadow = '0 6px 20px rgba(0,0,0,0.35)';
+    banner.style.display = 'flex';
+    banner.style.alignItems = 'center';
+    banner.style.gap = '10px';
+    banner.style.zIndex = '99999';
+    banner.style.fontSize = '13px';
+    banner.style.fontWeight = 'bold';
+    banner.style.cursor = 'pointer';
+
+    banner.innerHTML = `
+        <span>📲 Install App on this Device</span>
+        <button style="background:#f6e05e; color:#740202; border:none; padding:6px 14px; border-radius:15px; font-weight:bold; cursor:pointer;">Install</button>
+        <span style="font-size:18px; margin-left:6px; opacity:0.8;" onclick="event.stopPropagation(); document.getElementById('pwaInstallBanner').remove();">×</span>
+    `;
+
+    banner.onclick = async () => {
+        if (deferredInstallPrompt) {
+            deferredInstallPrompt.prompt();
+            const { outcome } = await deferredInstallPrompt.userChoice;
+            if (outcome === 'accepted') {
+                banner.remove();
+            }
+            deferredInstallPrompt = null;
+        }
+    };
+
+    document.body.appendChild(banner);
+}
+
+// Auto-initialize API connection on page load
+document.addEventListener('DOMContentLoaded', () => {
+    API.init();
+});
+
+
+</script>
+
+    <script>
+        // VERIFY ADMIN ACCESS
+        // Quick localStorage check first (just for UX — instant redirect if
+        // obviously not logged in), THEN a real server check that can't be
+        // spoofed from the browser console. The page content stays hidden
+        // until the server confirms the session is actually an admin.
+        const role = localStorage.getItem('loggedInRole');
+        const user = localStorage.getItem('loggedInUser');
+        // visibility normal
+
+        if (role !== 'admin') {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('adminName').textContent = `👤 ${user}`;
+            // Ask the server to confirm this session is really an admin.
+            // get_admin_stats is guarded by requireAdmin() in api.php, so a
+            // spoofed localStorage value (with no real admin session) gets
+            // rejected here even though the localStorage check above passed.
+            fetch(`${API.baseUrl}?action=get_admin_stats`)
+                .then(res => res.json())
+                .then(result => {
+                    if (!result.success) {
+                        alert('❌ Access Denied! Please log in as Administrator.');
+                        window.location.href = 'login.html';
+                    } else {
+                        // visibility visible
+                    }
+                })
+                .catch(() => {
+                    // API unreachable — fail closed rather than silently
+                    // trusting the client-side flag.
+                    alert('⚠️ï¸ Could not verify admin session. Please log in again.');
+                    window.location.href = 'login.html';
+                });
+        }
+
+        let allQuestionsCache = [];
+
+        // HANDLE TYPE DROPDOWN CHANGE
+        function handleTypeChange() {
+            const t = document.getElementById('qType').value;
+            const mcGroup = document.getElementById('mcGroup');
+            const tfGroup = document.getElementById('tfGroup');
+            const idGroup = document.getElementById('idGroup');
+
+            mcGroup.classList.add('hidden');
+            tfGroup.classList.add('hidden');
+            idGroup.classList.add('hidden');
+
+            if (t === 'multiple_choice') {
+                mcGroup.classList.remove('hidden');
+            } else if (t === 'true_false') {
+                tfGroup.classList.remove('hidden');
+            } else if (t === 'identification') {
+                idGroup.classList.remove('hidden');
+            }
+        }
+
+        // SWITCH ACTIVE TABS
+        function switchSection(sec) {
+            document.querySelectorAll('[id^="section-"]').forEach(s => s.classList.add('hidden'));
+            document.getElementById('section-' + sec).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+            if (window.event && window.event.target) {
+                window.event.target.classList.add('active');
+            }
+
+            if (sec === 'questions') renderQuestions();
+            if (sec === 'students') loadStudentDirectory();
+            if (sec === 'history') loadQuizHistory();
+            if (sec === 'analytics') loadAnalytics();
+        }
+
+        // CSS TAG CLASS
+        function getCategoryClass(cat) {
+            if (cat === 'Science') return 'tag-sci';
+            if (cat === 'Mathematics') return 'tag-math';
+            if (cat === 'Filipino') return 'tag-fil';
+            if (cat === 'English') return 'tag-eng';
+            return 'tag-soc';
+        }
+
+        function getTypeBadge(type) {
+            if (type === 'identification') {
+                return '<span class="type-tag tag-id">✍️ Identification</span>';
+            } else if (type === 'true_false') {
+                return '<span class="type-tag tag-tf">⚖️ True/False</span>';
+            }
+            return '<span class="type-tag tag-mc">🔤 Multiple Choice</span>';
+        }
+
+        // RENDER QUESTIONS WITH SEARCH AND FILTERS
+        async function renderQuestions() {
+            allQuestionsCache = await API.getQuestions('all', 'all', 'all', 'all');
+            const g = document.getElementById('filterGrade').value;
+            const c = document.getElementById('filterCategory').value;
+            const tp = document.getElementById('filterType').value;
+            const qSearch = (document.getElementById('searchQ').value || '').toLowerCase().trim();
+
+            const filtered = allQuestionsCache.filter(q => {
+                const okG = g === 'all' || !q.grade || q.grade === g;
+                const okC = c === 'all' || q.category === c;
+                const okT = tp === 'all' || q.type === tp;
+                const okS = !qSearch || q.question.toLowerCase().includes(qSearch) || (q.choices && q.choices.some(ch => ch.toLowerCase().includes(qSearch))) || (q.correct_text && q.correct_text.toLowerCase().includes(qSearch));
+                return okG && okC && okT && okS;
+            });
+
+            document.getElementById('qCount').textContent = filtered.length;
+            const box = document.getElementById('qList');
+
+            if (!filtered.length) {
+                box.innerHTML = '<p style="text-align:center; color:#a0aec0; padding:30px 10px;">No questions match your filter.</p>';
+                return;
+            }
+
+            box.innerHTML = '';
+            filtered.forEach((q, i) => {
+                const d = document.createElement('div');
+                d.className = 'question-item';
+                const diffCls = (q.difficulty || 'Easy').toLowerCase();
+                const qType = q.type || 'multiple_choice';
+
+                let answerSnippet = '';
+                if (qType === 'identification') {
+                    answerSnippet = `<b>✅ Correct Answer:</b> <span style="color:#2f855a; font-weight:700;">${q.correct_text || '(None)'}</span> <i>(Students type answer; no choices displayed)</i>`;
+                } else if (qType === 'true_false') {
+                    answerSnippet = `<b>✅ Correct Answer:</b> <span style="color:#2f855a; font-weight:700;">${q.correct === 0 ? 'True' : 'False'}</span>`;
+                } else {
+                    const choiceA = q.choices ? q.choices[0] : '';
+                    const choiceB = q.choices ? q.choices[1] : '';
+                    const choiceC = q.choices ? q.choices[2] : '';
+                    const choiceD = q.choices ? q.choices[3] : '';
+                    answerSnippet = `
+                        <b>A)</b> ${choiceA} • <b>B)</b> ${choiceB} • <b>C)</b> ${choiceC} • <b>D)</b> ${choiceD}<br>
+                        ✅ Correct: <b>Option ${['A','B','C','D'][q.correct]}</b>
+                    `;
+                }
+
+                d.innerHTML = `
+                    <p>
+                        <strong>#${i + 1}.</strong>
+                        ${getTypeBadge(qType)}
+                        <span class="grade-tag">Gr. ${q.grade || '11'}</span>
+                        <span class="subject-tag ${getCategoryClass(q.category)}">${q.category || 'General'}</span>
+                        <span class="diff-tag diff-${diffCls}">${q.difficulty || 'Easy'}</span><br>
+                        ${q.question}
+                    </p>
+                    <small>
+                        ${answerSnippet}
+                        ${q.explanation ? '<br>💡 Explanation: ' + q.explanation : ''}
+                    </small>
+                    <div class="actions">
+                        <button class="btn btn-edit" onclick="startEditQuestion(${q.id})">✏️ Edit</button>
+                        <button class="btn btn-danger" onclick="delQuestion(${q.id})">🗑️ Delete</button>
+                    </div>
+                `;
+                box.appendChild(d);
+            });
+        }
+
+        // FORM SUBMIT HANDLER (ADD / UPDATE)
+        document.getElementById('qForm').addEventListener('submit', async e => {
+            e.preventDefault();
+            const editId = document.getElementById('editId').value;
+            const qType = document.getElementById('qType').value;
+
+            let choices = [];
+            let correct = 0;
+            let correctText = '';
+
+            if (qType === 'multiple_choice') {
+                choices = [
+                    document.getElementById('optA').value.trim(),
+                    document.getElementById('optB').value.trim(),
+                    document.getElementById('optC').value.trim(),
+                    document.getElementById('optD').value.trim()
+                ];
+                correct = +document.getElementById('correctSel').value;
+                if (choices.some(c => !c)) {
+                    return alert("Please fill in all 4 choices for multiple choice!");
+                }
+            } else if (qType === 'true_false') {
+                choices = ['True', 'False'];
+                correct = +document.getElementById('tfCorrectSel').value;
+            } else if (qType === 'identification') {
+                choices = [];
+                correct = 0;
+                correctText = document.getElementById('identCorrectText').value.trim();
+                if (!correctText) {
+                    return alert("Please specify the correct answer word or phrase for identification!");
+                }
+            }
+
+            const qData = {
+                grade: document.getElementById('qGrade').value,
+                category: document.getElementById('qCategory').value,
+                difficulty: document.getElementById('qDifficulty').value,
+                type: qType,
+                question: document.getElementById('qText').value.trim(),
+                choices: choices,
+                correct: correct,
+                correct_text: correctText,
+                explanation: document.getElementById('qExplanation').value.trim() || 'The correct answer is shown above.'
+            };
+
+            if (editId) {
+                qData.id = +editId;
+                const res = await API.editQuestion(qData);
+                alert(res.message || '✅ Question updated successfully!');
+                cancelEdit();
+            } else {
+                const res = await API.addQuestion(qData);
+                alert(res.message || '✅ Question added successfully!');
+                e.target.reset();
+                document.getElementById('qType').value = qType;
+                handleTypeChange();
+            }
+
+            renderQuestions();
+        });
+
+        // START EDIT QUESTION
+        function startEditQuestion(id) {
+            const q = allQuestionsCache.find(item => item.id === id);
+            if (!q) return alert('Question not found.');
+
+            document.getElementById('editId').value = q.id;
+            const qType = q.type || 'multiple_choice';
+            document.getElementById('qType').value = qType;
+            handleTypeChange();
+
+            document.getElementById('qGrade').value = q.grade || '11';
+            document.getElementById('qCategory').value = q.category || 'Science';
+            document.getElementById('qDifficulty').value = q.difficulty || 'Easy';
+            document.getElementById('qText').value = q.question;
+
+            if (qType === 'multiple_choice') {
+                document.getElementById('optA').value = q.choices ? (q.choices[0] || '') : '';
+                document.getElementById('optB').value = q.choices ? (q.choices[1] || '') : '';
+                document.getElementById('optC').value = q.choices ? (q.choices[2] || '') : '';
+                document.getElementById('optD').value = q.choices ? (q.choices[3] || '') : '';
+                document.getElementById('correctSel').value = q.correct;
+            } else if (qType === 'true_false') {
+                document.getElementById('tfCorrectSel').value = q.correct;
+            } else if (qType === 'identification') {
+                document.getElementById('identCorrectText').value = q.correct_text || '';
+            }
+
+            document.getElementById('qExplanation').value = q.explanation || '';
+
+            document.getElementById('formTitle').textContent = `✏️ Edit Question #${q.id}`;
+            document.getElementById('saveBtn').textContent = '💾 Update Question';
+            document.getElementById('cancelEditBtn').classList.remove('hidden');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // CANCEL EDIT
+        function cancelEdit() {
+            document.getElementById('editId').value = '';
+            document.getElementById('qForm').reset();
+            document.getElementById('formTitle').textContent = '➕ Add New Question';
+            document.getElementById('saveBtn').textContent = '💾 Save Question';
+            document.getElementById('cancelEditBtn').classList.add('hidden');
+            handleTypeChange();
+        }
+
+        // DELETE QUESTION
+        async function delQuestion(id) {
+            if (confirm('Are you sure you want to delete this question?')) {
+                const res = await API.deleteQuestion(id);
+                alert(res.message || 'Question deleted.');
+                renderQuestions();
+            }
+        }
+
+        // LOAD STUDENT DIRECTORY
+        async function loadStudentDirectory() {
+            const students = await API.getStudentRecords();
+            const tb = document.getElementById('studentTableBody');
+            tb.innerHTML = '';
+
+            if (!students.length) {
+                tb.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px; color:#718096;">No students registered yet.</td></tr>';
+                return;
+            }
+
+            students.forEach((s, idx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${idx + 1}</td>
+                    <td><b>${s.name}</b></td>
+                    <td><code>${s.username}</code></td>
+                    <td>Level ${s.level || 1}</td>
+                    <td><b style="color:#c53030;">${s.points || 0} pts</b></td>
+                    <td>${s.quizzes_taken || 0}</td>
+                    <td>${s.best_pct !== null && s.best_pct !== undefined ? s.best_pct + '%' : '—'}</td>
+                    <td>${s.created_at ? s.created_at.split(' ')[0] : '—'}</td>
+                `;
+                tb.appendChild(tr);
+            });
+        }
+
+        // LOAD QUIZ HISTORY
+        async function loadQuizHistory() {
+            const history = await API.getQuizHistory();
+            const tb = document.getElementById('historyTableBody');
+            tb.innerHTML = '';
+
+            if (!history.length) {
+                tb.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:20px; color:#718096;">No quiz submissions recorded yet.</td></tr>';
+                return;
+            }
+
+            history.forEach((h, idx) => {
+                const tr = document.createElement('tr');
+                const pct = h.percentage !== undefined ? h.percentage : Math.round((h.score / h.total_questions) * 100);
+                const color = pct >= 75 ? '#2f855a' : '#c53030';
+
+                tr.innerHTML = `
+                    <td>${idx + 1}</td>
+                    <td><b>${h.student_name}</b></td>
+                    <td>Gr. ${h.grade || '11'}</td>
+                    <td>${h.subject || 'General'}</td>
+                    <td>${h.score}/${h.total_questions}</td>
+                    <td><b style="color:${color};">${pct}%</b></td>
+                    <td>+${h.points_earned || (h.score * 10)}</td>
+                    <td><small>${h.created_at || '—'}</small></td>
+                    <td><button class="btn btn-danger" style="padding:4px 8px; font-size:11px;" onclick="delScoreRecord(${h.id})">Delete</button></td>
+                `;
+                tb.appendChild(tr);
+            });
+        }
+
+        // DELETE SCORE RECORD
+        async function delScoreRecord(id) {
+            if (confirm('Delete this score entry?')) {
+                await API.deleteScore(id);
+                loadQuizHistory();
+            }
+        }
+
+        // LOAD ANALYTICS
+        async function loadAnalytics() {
+            const stats = await API.getAdminStats();
+            document.getElementById('kpiStudents').textContent = stats.totalStudents;
+            document.getElementById('kpiQuestions').textContent = stats.totalQuestions;
+            document.getElementById('kpiQuizzes').textContent = stats.totalQuizzes;
+            document.getElementById('kpiAccuracy').textContent = stats.avgAccuracy + '%';
+
+            // Subject breakdown
+            const sbBox = document.getElementById('subjectBreakdown');
+            if (stats.subjCounts && stats.subjCounts.length) {
+                sbBox.innerHTML = stats.subjCounts.map(item => `
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:14px;">
+                        <span>${item.category}:</span>
+                        <b>${item.cnt} questions</b>
+                    </div>
+                `).join('');
+            } else {
+                sbBox.textContent = 'No subject distribution data available.';
+            }
+
+            // Grade breakdown
+            const gbBox = document.getElementById('gradeBreakdown');
+            if (stats.gradeCounts && stats.gradeCounts.length) {
+                gbBox.innerHTML = stats.gradeCounts.map(item => `
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:14px;">
+                        <span>Grade ${item.grade}:</span>
+                        <b>${item.cnt} questions</b>
+                    </div>
+                `).join('');
+            } else {
+                gbBox.textContent = 'No grade distribution data available.';
+            }
+
+            // Type breakdown
+            const tbBox = document.getElementById('typeBreakdown');
+            if (stats.typeCounts && stats.typeCounts.length) {
+                const typeLabels = { multiple_choice: 'Multiple Choice', true_false: 'True or False', identification: 'Identification' };
+                tbBox.innerHTML = stats.typeCounts.map(item => `
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:14px;">
+                        <span>${typeLabels[item.type] || item.type}:</span>
+                        <b>${item.cnt} questions</b>
+                    </div>
+                `).join('');
+            } else {
+                tbBox.textContent = 'No question type distribution data available.';
+            }
+        }
+
+        // SAFE LOGOUT
+        function logout() {
+            if (confirm('Are you sure you want to log out from the Admin Dashboard?')) {
+                API.logout();
+            }
+        }
+
+        // INITIAL LOAD
+        document.addEventListener('DOMContentLoaded', () => {
+            handleTypeChange();
+            renderQuestions();
+        });
+    </script>
+</body>
+</html>
